@@ -1,0 +1,8 @@
+# Convert shell scripts to LF
+*.sh text eol=lf
+
+# Convert Python files to LF
+*.py text eol=lf
+
+# Convert Dockerfiles to LF
+Dockerfile text eol=lf

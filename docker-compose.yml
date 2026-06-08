@@ -1,0 +1,136 @@
+services:
+  # ── Local PostgreSQL (for dev/testing with synced prod data) ──
+  # Start with:  docker compose up db -d
+  # Then sync:   cd backend && python scripts/sync_db.py
+
+  db:
+    image: postgres:16
+    restart: "no"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changethis
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432" # Expose for direct access in local dev
+
+  adminer:
+    image: adminer
+    restart: "no"
+    networks:
+      - default
+    depends_on:
+      - db
+    environment:
+      - ADMINER_DESIGN=pepa-linha-dark
+    ports:
+      - "8080:8080" # Access via http://localhost:8080 for database management
+
+  prestart:
+    image: "backend"
+    build:
+      context: ./backend
+    networks:
+      - default
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    #     restart: true
+    command: bash scripts/prestart.sh
+    env_file:
+      - .env
+    volumes:
+      - ./backend/app/alembic:/app/app/alembic
+
+  backend:
+    image: "backend"
+    restart: "no"
+    networks:
+      - default
+    depends_on:
+      # db:
+      #   condition: service_healthy
+      #   restart: true
+      prestart:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # Specify the development Dockerfile
+    command:
+      - fastapi
+      - run
+      - --reload
+      - "app/main.py"
+    develop:
+      watch:
+        - path: ./backend
+          action: sync
+          target: /app
+          ignore:
+            - ./backend/.venv
+            - .venv
+        - path: ./backend/pyproject.toml
+          action: rebuild
+    ports:
+      - "8000:8000" # Access FastAPI at http://localhost:8000
+    environment:
+      # - SMTP_HOST=${SMTP_HOST?Variable not set}
+      # - SMTP_USER=${SMTP_USER?Variable not set}
+      # - SMTP_PASSWORD=${SMTP_PASSWORD?Variable not set}
+      # - SMTP_TLS=${SMTP_TLS?Variable not set}
+      # - SMTP_SSL=${SMTP_SSL?Variable not set}
+      # - SMTP_PORT=${SMTP_PORT?Variable not set}
+      SMTP_HOST: "mailcatcher"
+      SMTP_PORT: "1025"
+      SMTP_TLS: "false"
+      EMAILS_FROM_EMAIL: "noreply@example.com"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/scripts:/app/scripts
+
+  # frontend:
+  #   restart: "no"
+  #   networks:
+  #     - default
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile # Specify the development Dockerfile
+  #     args:
+  #       NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+  #   ports:
+  #     - "5173:3000"
+
+  # billing-worker:
+  #   image: "backend"
+  #   restart: "no"
+  #   networks:
+  #     - default
+  #   depends_on:
+  #     prestart:
+  #       condition: service_completed_successfully
+  #   env_file:
+  #     - .env
+  #   command: python scripts/run_billing_worker.py
+  #   volumes:
+  #     - ./backend/app:/app/app
+  #     - ./backend/scripts:/app/scripts
+
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+volumes:
+  app-db-data:

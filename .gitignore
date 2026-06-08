@@ -1,0 +1,52 @@
+.vscode
+.env
+
+# Dependencies
+node_modules/
+.npm
+
+# Infrastructure & Cloud
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+.terraform/providers/
+**/.terraform/*
+terraform-provider-*
+crash.log
+
+# Helm
+*.tgz
+charts/*/charts
+charts/*/Chart.lock
+**/charts/*.tgz
+
+.env
+.env.*
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Cache
+.cache/
+.eslintcache
+.tsbuildinfo
+
+# System Files
+.DS_Store
+Thumbs.db
