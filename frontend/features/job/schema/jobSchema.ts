@@ -1,16 +1,9 @@
 import * as z from "zod"
 
-export const statusSchema = z.enum([
-  "open",
-  "purchased",
-  "en_route",
-  "completed",
-])
+export const statusSchema = z.enum(["open", "closed"])
 export const statusLabels = {
   open: "Open",
-  purchased: "Purchased",
-  en_route: "En Route",
-  completed: "Completed",
+  closed: "Closed",
 }
 
 export const serviceTypeSchema = z.enum([
@@ -36,12 +29,12 @@ export const vehicleClassSchema = z.enum([
 export const urgencySchema = z.enum(["Immediate", "Scheduled"])
 
 export const jobSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   service_type: serviceTypeSchema,
   urgency: urgencySchema,
-  status: statusSchema,
+  lead_status: statusSchema,
   created_at: z.string(),
-  created_by_id: z.string().uuid(),
+  created_by_id: z.uuid(),
   /** What the provider pays to acquire this job lead */
   lead_price: z.number(),
   /** Estimated value of the job to the provider */
@@ -58,12 +51,15 @@ export const jobSchema = z.object({
   dropoff_location: z.string().optional().nullable(),
   // Details
   description: z.string().optional().nullable(),
+  max_buyers: z.number().default(1).optional().nullable(),
+  purchase_count: z.number().default(0).optional().nullable(),
+  closed_at: z.string().optional().nullable(),
 })
 
 export const jobCreateSchema = z.object({
   service_type: serviceTypeSchema,
   urgency: urgencySchema,
-  status: statusSchema.optional(),
+  lead_status: statusSchema.optional(),
   lead_price: z.number(),
   estimated_payout: z.number(),
   distance_miles: z.number(),
@@ -77,8 +73,14 @@ export const jobCreateSchema = z.object({
   description: z.string().optional().nullable(),
 })
 
+const leads = z.object({
+  job_id: z.uuid(),
+  purchased_at: z.string(),
+})
+
 export const jobUpdateSchema = jobCreateSchema.partial()
 
 export type Job = z.infer<typeof jobSchema>
 export type JobCreate = z.infer<typeof jobCreateSchema>
 export type JobUpdate = z.infer<typeof jobUpdateSchema>
+export type Lead = z.infer<typeof leads>

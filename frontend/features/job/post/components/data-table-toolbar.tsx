@@ -25,11 +25,11 @@ export function DataTableToolbar<TData>({
           placeholder="Filter job postings..."
           value={(table.getState().globalFilter as string) ?? ""}
           onChange={(event) => table.setGlobalFilter(event.target.value)}
-          className="h-8"
+          className="max-w-xs text-sm"
         />
-        {table.getColumn("status") && (
+        {table.getColumn("lead_status") && (
           <DataTableFacetedFilter
-            column={table.getColumn("status")}
+            column={table.getColumn("lead_status")}
             title="Status"
             options={statuses}
           />
@@ -53,19 +53,7 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <div className="flex items-center gap-2">
-        {/* <DataTableViewOptions table={table} /> */}
         <CreateJobDialog />
-        {/* <Dialog>
-          <DialogTrigger asChild>
-            <Button size="sm">Add Job Posting</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create A Job Posting</DialogTitle>
-            </DialogHeader>
-            <RecoveryRequestForm />
-          </DialogContent>
-        </Dialog> */}
       </div>
     </div>
   )

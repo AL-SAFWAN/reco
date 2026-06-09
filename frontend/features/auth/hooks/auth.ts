@@ -54,7 +54,7 @@ export const useSignUpMutation = () => {
     mutationFn: signup,
     onSuccess: (data) => {
       queryClient.setQueryData(["user"], data)
-      router.push("/")
+      router.push("/otp")
     },
   })
 }

@@ -6,13 +6,13 @@ import { UserNav } from "@/features/job/post/components/user-nav"
 
 const Navbar = () => {
   return (
-    <nav className="h-16 border-b bg-background">
+    <nav className="h-16 border-b border-border/60 bg-background">
       <div className="mx-auto flex h-full max-w-(--breakpoint-xl) items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="hidden flex-col leading-none sm:flex">
-          <p className="font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
+        <div className="flex flex-col leading-none">
+          <p className="text-base font-black tracking-tight text-foreground sm:text-xl">
             RECo
           </p>
-          <p className="text-[10px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
+          <p className="text-[9px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             Recovery Platform
           </p>
         </div>

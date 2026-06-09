@@ -38,13 +38,13 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
     mutate(data)
   }
   return (
-    <div className={cn("space-y-4", className)} {...props}>
-      <div className="flex flex-col space-y-1 text-center sm:space-y-2">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-          Login to your account
+    <div className={cn("space-y-6", className)} {...props}>
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+          Log in to your account
         </h1>
-        <p className="text-xs text-muted-foreground sm:text-sm">
-          Enter your credentials
+        <p className="text-sm text-muted-foreground">
+          Enter your credentials below
         </p>
       </div>
       <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -73,7 +73,7 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
             <div className="flex items-center justify-between">
               <FieldLabel htmlFor="password">Password</FieldLabel>
               <Link
-                className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
+                className="text-xs font-semibold text-muted-foreground underline underline-offset-4 hover:text-foreground hover:no-underline"
                 href={"/password-recover"}
               >
                 Forgot password?
@@ -93,6 +93,7 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
         </FieldGroup>
         <Button
           className="w-full"
+          size="lg"
           disabled={isLoading}
           type="submit"
           aria-busy={isLoading}
@@ -103,11 +104,11 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300/70 to-transparent dark:via-neutral-700/70" />
-      <p className="text-center text-xs text-muted-foreground sm:text-sm">
+      <div className="h-px w-full bg-border" />
+      <p className="text-center text-sm text-muted-foreground">
         Don't have an Account?{" "}
         <Link
-          className="underline underline-offset-4 hover:text-primary"
+          className="font-semibold text-foreground underline underline-offset-4 hover:no-underline"
           type="submit"
           href={"/signup"}
         >

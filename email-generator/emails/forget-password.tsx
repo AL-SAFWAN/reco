@@ -30,7 +30,7 @@ export const ForgotPasswordEmail = ({
   validMins = "{{validMins}}",
   resetPasswordLink = "{{resetPasswordLink}}",
 }: ForgotPasswordEmailProps) => {
-  const previewText = "Reset Your Password for Legion Grappling Academy";
+  const previewText = "Reset Your Password for RECo";
 
   return (
     <Html>
@@ -105,8 +105,7 @@ export const ForgotPasswordEmail = ({
 
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full mb-0" />
             <Text className=" text-xs text-zinc-400">
-              Legion Grappling Academy Unit 5 Transform House, London, LDN E10
-              7QF 02034908660
+              RECo Unit 5 Transform House, London, LDN E10 7QF 02034908660
             </Text>
           </Container>
         </Body>

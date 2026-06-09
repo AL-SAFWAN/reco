@@ -25,8 +25,8 @@ export type OTPFormInputs = z.infer<typeof otpSchema>
 
 export const signUpSchema = z
   .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
+    first_name: z.string().min(1, "First name is required"),
+    last_name: z.string().min(1, "Last name is required"),
     email: z
       .string()
       .email("Invalid email address")
@@ -35,11 +35,11 @@ export const signUpSchema = z
       .string()
       .min(1, "Password is required")
       .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/, ""),
-    confirmPassword: z.string().min(1, "Enter password again"),
+    confirm_password: z.string().min(1, "Enter password again").optional(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.confirm_password, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
+    path: ["confirm_password"],
   })
 
 export type SignUpFormInputs = z.infer<typeof signUpSchema>

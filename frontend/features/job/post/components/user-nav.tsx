@@ -26,17 +26,15 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src="/avatars/03.png" alt={user?.first_name} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-        </Button>
+        <Avatar className="h-9 w-9 hover:cursor-pointer">
+          <AvatarImage src="/avatars/03.png" alt={user?.first_name} />
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm leading-none font-medium">
+            <p className="truncate text-sm leading-none font-medium">
               {user ? `${user.first_name} ${user.last_name}` : "—"}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
@@ -54,7 +52,7 @@ export function UserNav() {
           className="text-destructive focus:text-destructive"
           onSelect={() => logout()}
         >
-          <LogOutIcon className="mr-2 size-4" />
+          <LogOutIcon className="mr-2 size-4 stroke-destructive" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

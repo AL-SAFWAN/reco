@@ -23,6 +23,7 @@ fileConfig(config.config_file_name)
 from app.core.config import settings  # noqa
 from app.modules.job.domain.models import Job  # noqa
 from app.modules.user.domain.models import User  # noqa
+from app.modules.marketplace.domain.models import LeadPurchase, SavedJob  # noqa
 
 target_metadata = SQLModel.metadata
 

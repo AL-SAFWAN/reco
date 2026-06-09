@@ -1,6 +1,11 @@
 "use client"
 import clientFetcher from "@/fetcher/client.fetcher"
-import { Job, JobCreate, JobUpdate } from "@/features/job/schema/jobSchema"
+import {
+  Job,
+  JobCreate,
+  JobUpdate,
+  Lead,
+} from "@/features/job/schema/jobSchema"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -73,6 +78,92 @@ export const useDeleteJobMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] })
       queryClient.removeQueries({ queryKey: ["jobs", id] })
       toast.success("Job deleted successfully")
+    },
+  })
+}
+
+const MARKETPLACE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/marketplace`
+
+// marketplace
+const fetchMarketplaceJobs = (): Promise<Job[]> =>
+  clientFetcher(`${MARKETPLACE_URL}/`, { method: "GET" })
+
+const fetchUserLeads = (): Promise<Lead[]> =>
+  clientFetcher(`${MARKETPLACE_URL}/leads`, { method: "GET" })
+
+const purchaseLead = (id: string): Promise<Job> =>
+  clientFetcher(`${MARKETPLACE_URL}/leads/${id}/purchase`, { method: "POST" })
+
+export const useMarketplaceJobsQuery = () => {
+  return useQuery({
+    queryKey: ["marketplace", "jobs"],
+    queryFn: fetchMarketplaceJobs,
+  })
+}
+
+export const useUserLeadsQuery = () => {
+  return useQuery({
+    queryKey: ["marketplace", "leads"],
+    queryFn: fetchUserLeads,
+  })
+}
+
+export const usePurchaseLeadMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: purchaseLead,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "jobs"] })
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "leads"] })
+      queryClient.invalidateQueries({ queryKey: ["jobs", data.id] })
+      toast.success("Lead purchased successfully")
+    },
+  })
+}
+
+// ── Saved Jobs ────────────────────────────────────────────────────
+
+type SavedJob = { job_id: string; saved_at: string }
+
+const fetchSavedJobs = (): Promise<SavedJob[]> =>
+  clientFetcher(`${MARKETPLACE_URL}/saved`, { method: "GET" })
+
+const saveJob = (id: string): Promise<SavedJob> =>
+  clientFetcher(`${MARKETPLACE_URL}/saved/${id}`, { method: "POST" })
+
+const unsaveJob = (id: string): Promise<void> =>
+  clientFetcher(`${MARKETPLACE_URL}/saved/${id}`, { method: "DELETE" })
+
+export const useSavedJobsQuery = () =>
+  useQuery({
+    queryKey: ["marketplace", "saved"],
+    queryFn: fetchSavedJobs,
+  })
+
+export const useSaveJobMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: saveJob,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "saved"] })
+      toast.success("Job saved")
+    },
+    onError: () => {
+      toast.error("Could not save job")
+    },
+  })
+}
+
+export const useUnsaveJobMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: unsaveJob,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "saved"] })
+      toast.success("Job removed from saved")
+    },
+    onError: () => {
+      toast.error("Could not remove saved job")
     },
   })
 }

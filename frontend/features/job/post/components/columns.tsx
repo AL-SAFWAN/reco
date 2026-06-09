@@ -109,13 +109,13 @@ export const columns: ColumnDef<Job>[] = [
     enableGlobalFilter: true,
   },
   {
-    accessorKey: "status",
+    accessorKey: "lead_status",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
       const status = statuses.find(
-        (status) => status.value === row.getValue("status")
+        (status) => status.value === row.getValue("lead_status")
       )
 
       if (!status) {

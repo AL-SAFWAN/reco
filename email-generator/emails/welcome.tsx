@@ -55,7 +55,7 @@ export const VercelInviteUserEmail = ({
             <Heading className="text-black text-[24px] font-normal text-center p-0 mb-[30px]  mx-0 mt-0">
               <strong>
                 Welcome to <br />
-                Legion Grappling Academy!
+                RECo!
               </strong>
             </Heading>
             <Text className="text-black text-[14px] leading-[24px]">
@@ -123,8 +123,7 @@ export const VercelInviteUserEmail = ({
             {/* Divider */}
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full mb-0" />
             <Text className=" text-xs text-zinc-400">
-              Legion Grappling Academy Unit 5 Transform House, London, LDN E10
-              7QF 02034908660
+              RECo Unit 5 Transform House, London, LDN E10 7QF 02034908660
             </Text>
           </Container>
         </Body>

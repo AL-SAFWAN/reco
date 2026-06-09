@@ -339,7 +339,7 @@ export function CreateJobDialog() {
       service_type: "Towing & Transport",
       urgency: "Immediate",
       vehicle_class: "Car",
-      is_drivable: false,
+      is_drivable: true,
       pickup_area: AREAS[0],
       lead_price: 10,
       estimated_payout: 120,
@@ -458,18 +458,18 @@ export function EditJobDialog({
             {/* Service + Urgency */}
             <div className="grid gap-4 sm:grid-cols-2">
               <Controller
-                name="status"
+                name="lead_status"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="status">Status</FieldLabel>
+                    <FieldLabel htmlFor="lead_status">Status</FieldLabel>
                     <Select
                       name={field.name}
                       value={field.value}
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
-                        id="status"
+                        id="lead_status"
                         aria-invalid={fieldState.invalid}
                         className="w-full"
                       >

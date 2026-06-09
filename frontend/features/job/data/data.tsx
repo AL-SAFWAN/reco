@@ -36,16 +36,10 @@ export const statuses = [
   },
 
   {
-    value: "completed",
-    label: "Completed",
+    value: "closed",
+    label: "Closed",
     icon: CheckCircle,
   },
-  {
-    value: "purchased",
-    label: "Purchased",
-    icon: CirclePoundSterling,
-  },
-  { value: "en_route", label: "En Route", icon: Timer },
 ]
 
 export const urgency = [

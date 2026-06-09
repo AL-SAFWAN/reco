@@ -42,12 +42,15 @@ export function DataTableFacetedFilter<TData, TValue>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 border-dashed">
+        <Button
+          variant="outline"
+          className="hidden border-dashed font-medium sm:flex"
+        >
           <PlusCircle />
           {title}
           {selectedValues?.size > 0 && (
             <>
-              <Separator orientation="vertical" className="mx-2 h-4" />
+              <Separator orientation="vertical" className="mx-2 w-[0.5px]!" />
               <Badge
                 variant="secondary"
                 className="rounded-sm px-1 font-normal lg:hidden"

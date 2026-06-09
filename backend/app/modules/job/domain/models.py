@@ -2,15 +2,17 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
+from pydantic import computed_field
 import sqlalchemy as sa
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
+
+from app.modules.marketplace.domain.models import LeadPurchase, LeadPurchasePublic
 
 
-class Status(str, Enum):
+class LeadStatus(str, Enum):
     open = "open"
-    purchased = "purchased"
-    en_route = "en_route"
-    completed = "completed"
+    partial = "partial"
+    closed = "closed"
 
 
 class ServiceType(str, Enum):
@@ -39,7 +41,11 @@ class Urgency(str, Enum):
 
 
 class JobBase(SQLModel):
-    status: Status = Field(default=Status.open, nullable=False)
+    lead_status: LeadStatus = Field(default=LeadStatus.open, nullable=False)
+    max_buyers: int = Field(default=3, nullable=False)
+    closed_at: datetime | None = Field(
+        default=None, sa_column=sa.Column(sa.DateTime(timezone=True), nullable=True)
+    )
     service_type: ServiceType = Field(nullable=False)
     urgency: Urgency = Field(nullable=False)
     # values
@@ -68,6 +74,7 @@ class Job(JobBase, table=True):
             nullable=False,
         ),
     )
+    lead_purchases: list["LeadPurchase"] = Relationship(back_populates="job")
 
 
 # ── Request / Response Schemas ──────────────────────────────────────
@@ -78,7 +85,8 @@ class JobCreate(JobBase):
 
 
 class JobUpdate(SQLModel):
-    status: Status | None = None
+    lead_status: LeadStatus | None = None
+    closed_at: datetime | None = None
     service_type: ServiceType | None = None
     urgency: Urgency | None = None
     lead_price: float | None = None
@@ -98,3 +106,24 @@ class JobPublic(JobBase):
     id: uuid.UUID
     created_by_id: uuid.UUID
     created_at: datetime
+
+
+class JobMarketplaceRedacted(SQLModel):
+    id: uuid.UUID
+    # created_by_id: uuid.UUID
+    created_at: datetime
+    purchased: bool = False
+    # TODO remove the after getting the count
+    lead_purchases: list[LeadPurchasePublic] = []
+    # pickup_area: str
+    lead_status: LeadStatus
+    service_type: ServiceType
+    lead_price: float
+    estimated_payout: float
+    max_buyers: int
+    # dropoff_location: str
+
+    @computed_field
+    @property
+    def purchase_count(self) -> int:
+        return len(self.lead_purchases) if self.lead_purchases else 0

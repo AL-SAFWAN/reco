@@ -21,7 +21,9 @@ def list_jobs(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 200
 ) -> Any:
     print("Listing jobs with skip:", skip, "and limit:", limit)
-    return repository.get_jobs(session=session, skip=skip, limit=limit)
+    return repository.get_jobs(
+        session=session, user_id=current_user.id, skip=skip, limit=limit
+    )
 
 
 @router.post(
@@ -39,7 +41,7 @@ def create_job(
 
 @router.get("/{job_id}", response_model=JobPublic)
 def read_job(job_id: uuid.UUID, session: SessionDep, current_user: CurrentUser) -> Any:
-    job = repository.get_job(session=session, job_id=job_id)
+    job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
@@ -53,7 +55,7 @@ def update_job(
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Any:
-    db_job = repository.get_job(session=session, job_id=job_id)
+    db_job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
     if not db_job:
         raise HTTPException(status_code=404, detail="Job not found")
 
@@ -67,7 +69,7 @@ def delete_job(
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Response:
-    db_job = repository.get_job(session=session, job_id=job_id)
+    db_job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
     if not db_job:
         raise HTTPException(status_code=404, detail="Job not found")
 

@@ -70,7 +70,7 @@ export const MilestoneReachedEmail = ({
             <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
             <Text className="text-[12px] leading-[24px] text-[#666666]">
               You're receiving this because you're enrolled in a curriculum on
-              Legion Grappling Academy.
+              RECo.
             </Text>
           </Container>
         </Body>

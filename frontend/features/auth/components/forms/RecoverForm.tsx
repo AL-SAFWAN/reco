@@ -57,6 +57,7 @@ export function RecoverForm({ className, ...props }: UserAuthFormProps) {
         </FieldGroup>
         <Button
           className="w-full"
+          size="lg"
           disabled={isLoading}
           type="submit"
           aria-busy={isLoading}

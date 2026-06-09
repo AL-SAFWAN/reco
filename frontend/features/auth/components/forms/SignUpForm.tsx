@@ -37,6 +37,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
     resolver: zodResolver(signUpSchema),
   })
   function onSubmit(data: SignUpFormInputs) {
+    delete data.confirm_password
     mutate(data)
   }
   return (
@@ -51,29 +52,29 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
             <ErrorAlert isError={isError} error={error} />
           </div>
           <FieldGroup>
-            <Field data-invalid={!!errors.firstName}>
+            <Field data-invalid={!!errors.first_name}>
               <FieldLabel htmlFor="firstName">First name</FieldLabel>
               <Input
                 id="firstName"
                 placeholder="Tyler"
                 type="text"
                 autoComplete="given-name"
-                {...register("firstName")}
-                aria-invalid={!!errors.firstName}
+                {...register("first_name")}
+                aria-invalid={!!errors.first_name}
               />
-              {errors.firstName && <FieldError errors={[errors.firstName]} />}
+              {errors.first_name && <FieldError errors={[errors.first_name]} />}
             </Field>
-            <Field data-invalid={!!errors.lastName}>
+            <Field data-invalid={!!errors.last_name}>
               <FieldLabel htmlFor="lastName">Last name</FieldLabel>
               <Input
                 id="lastName"
                 placeholder="Durden"
                 type="text"
                 autoComplete="family-name"
-                {...register("lastName")}
-                aria-invalid={!!errors.lastName}
+                {...register("last_name")}
+                aria-invalid={!!errors.last_name}
               />
-              {errors.lastName && <FieldError errors={[errors.lastName]} />}
+              {errors.last_name && <FieldError errors={[errors.last_name]} />}
             </Field>
             <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Email Address</FieldLabel>
@@ -98,24 +99,25 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
                 disabled={isLoading}
               />
             </Field>
-            <Field data-invalid={!!errors.confirmPassword}>
+            <Field data-invalid={!!errors.confirm_password}>
               <FieldLabel htmlFor="confirmPassword">
                 Confirm Password
               </FieldLabel>
               <TogglePassword
                 id="confirmPassword"
                 disabled={isLoading}
-                register={register("confirmPassword")}
-                errors={errors.confirmPassword}
-                aria-invalid={!!errors.confirmPassword}
+                register={register("confirm_password")}
+                errors={errors.confirm_password}
+                aria-invalid={!!errors.confirm_password}
               />
-              {errors.confirmPassword && (
-                <FieldError errors={[errors.confirmPassword]} />
+              {errors.confirm_password && (
+                <FieldError errors={[errors.confirm_password]} />
               )}
             </Field>
           </FieldGroup>
           <Button
             className="w-full"
+            size="lg"
             disabled={isLoading}
             type="submit"
             aria-busy={isLoading}

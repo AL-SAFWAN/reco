@@ -54,7 +54,7 @@ function FilterSelect({
       value={value || undefined}
       onValueChange={(v) => onValueChange(v === "all" ? "" : v)}
     >
-      <SelectTrigger className="w-full max-w-48 bg-background">
+      <SelectTrigger className="w-full max-w-48">
         <SelectValue placeholder={label} />
       </SelectTrigger>
       <SelectContent>

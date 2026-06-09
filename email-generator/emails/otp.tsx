@@ -25,7 +25,7 @@ const baseUrl = process.env.VERCEL_URL
 export const VercelOtpEmail = ({
   otpCode = "{{otpCode}}",
 }: VercelOtpEmailProps) => {
-  const previewText = `Your OTP Code – Legion Grappling Academy`;
+  const previewText = `Your OTP Code – RECo`;
   // const formattedOtp =
   //   otpCode.length === 6
   //     ? `${otpCode.slice(0, 3)}◦${otpCode.slice(3)}`
@@ -43,12 +43,12 @@ export const VercelOtpEmail = ({
                 src={`${baseUrl}/static/unnamed.gif`}
                 width="40"
                 height="37"
-                alt="Legion Grappling Academy Logo"
+                alt="RECo Logo"
                 className="my-0 mx-auto aspect-square size-32 object-contain"
               />
             </Section>
             <Heading className="text-black text-[24px] font-normal text-center p-0 mb-[30px] mx-0 mt-0">
-              <strong>Legion Grappling Academy</strong>
+              <strong>RECo</strong>
             </Heading>
 
             <Text className="text-black text-[14px] leading-[24px]">
@@ -74,8 +74,7 @@ export const VercelOtpEmail = ({
 
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full mb-0" />
             <Text className="text-xs text-zinc-400">
-              Legion Grappling Academy Unit 5 Transform House, London, LDN E10
-              7QF 02034908660
+              RECo Unit 5 Transform House, London, LDN E10 7QF 02034908660
             </Text>
           </Container>
         </Body>

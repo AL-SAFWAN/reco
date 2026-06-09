@@ -17,7 +17,11 @@ export const NavigationSheet = () => {
       </VisuallyHidden>
 
       <SheetTrigger asChild>
-        <Button size="icon" variant="outline">
+        <Button
+          size="icon"
+          variant="outline"
+          className="border-0 bg-background! hover:bg-input!"
+        >
           <Menu />
         </Button>
       </SheetTrigger>

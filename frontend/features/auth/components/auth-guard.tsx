@@ -11,11 +11,18 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isLoading) return
+
+    if (!user) {
       const isUnauthorized = error instanceof ApiError && error.status === 401
       if (isUnauthorized || error) {
         router.replace(`/login?redirect=${encodeURIComponent(pathname)}`)
       }
+      return
+    }
+
+    if (!user.email_verified) {
+      router.replace("/otp")
     }
   }, [isLoading, user, error, router, pathname])
 
@@ -28,6 +35,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return null
+  if (!user.email_verified) return null
 
   return <>{children}</>
 }

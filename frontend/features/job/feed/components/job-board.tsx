@@ -5,15 +5,25 @@ import { SearchX } from "lucide-react"
 import { EMPTY_FILTERS, type Filters, JobSearchForm } from "./job-search-form"
 import { JobCard } from "./job-card"
 import { JobDetail } from "./job-details"
-import { useJobsQuery } from "../../hooks/job"
+import {
+  useUserLeadsQuery,
+  useMarketplaceJobsQuery,
+  useSavedJobsQuery,
+  useSaveJobMutation,
+  useUnsaveJobMutation,
+} from "../../hooks/job"
 
 export function JobBoard() {
-  const { data = [] } = useJobsQuery()
+  const { data = [] } = useMarketplaceJobsQuery()
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [selectedId, setSelectedId] = useState<string>(data[0]?.id ?? "")
 
-  const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set())
-  const [purchasedIds, setPurchasedIds] = useState<Set<string>>(() => new Set())
+  const { data: savedJobs = [] } = useSavedJobsQuery()
+  const savedIds = new Set(savedJobs.map((s) => s.job_id))
+  const saveJobMutation = useSaveJobMutation()
+  const unsaveJobMutation = useUnsaveJobMutation()
+
+  const { data: purchasedLeads = [] } = useUserLeadsQuery()
 
   const results = useMemo(() => {
     return data.filter((job) => {
@@ -26,7 +36,7 @@ export function JobBoard() {
           job.vehicle_class === filters.vehicle_class) &&
         (!filters.urgency || job.urgency === filters.urgency) &&
         (!filters.area || job.pickup_area === filters.area) &&
-        (!filters.open_only || job.status === "open")
+        (!filters.open_only || job.lead_status === "open")
       )
     })
   }, [filters, data])
@@ -34,21 +44,17 @@ export function JobBoard() {
   const selected = results.find((j) => j.id === selectedId) ?? results[0]
 
   const toggleSave = (id: string) => {
-    setSavedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const buyJob = (id: string) => {
-    setPurchasedIds((prev) => new Set(prev).add(id))
+    if (savedIds.has(id)) {
+      unsaveJobMutation.mutate(id)
+    } else {
+      saveJobMutation.mutate(id)
+    }
   }
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border bg-card p-4 sm:p-5">
+      {/* Filter bar */}
+      <div className="rounded-2xl border bg-card p-4 sm:p-5">
         <JobSearchForm
           filters={filters}
           onChange={setFilters}
@@ -57,13 +63,13 @@ export function JobBoard() {
       </div>
 
       {results.length > 0 ? (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              {results.length} recovery job{results.length === 1 ? "" : "s"}{" "}
-              available
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,400px)_1fr]">
+          {/* List */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              {results.length} job{results.length === 1 ? "" : "s"} available
             </p>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {results.map((job) => (
                 <JobCard
                   key={job.id}
@@ -75,26 +81,28 @@ export function JobBoard() {
             </div>
           </div>
 
-          <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
+          {/* Detail */}
+          <div className="lg:sticky lg:top-6 lg:self-start">
             {selected && (
               <JobDetail
                 job={selected}
                 saved={savedIds.has(selected.id)}
-                purchased={purchasedIds.has(selected.id)}
+                purchased={purchasedLeads.some(
+                  (lead) => lead.job_id === selected.id
+                )}
                 onToggleSave={() => toggleSave(selected.id)}
-                onBuy={() => buyJob(selected.id)}
               />
             )}
           </div>
         </div>
       ) : (
         <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-center">
-          <SearchX className="size-12 text-muted-foreground" />
+          <SearchX className="size-12 text-muted-foreground/30" />
           <div>
-            <p className="text-lg font-semibold text-foreground">
+            <p className="text-base font-bold text-foreground">
               No recovery jobs found
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-0.5 text-sm text-muted-foreground">
               Try adjusting your filters or widening your search area.
             </p>
           </div>

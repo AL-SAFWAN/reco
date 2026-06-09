@@ -1,4 +1,5 @@
 "use client"
+import { useTheme } from "next-themes"
 import { Effect, EffectComposer, EffectPass, RenderPass } from "postprocessing"
 import React, { useEffect, useRef } from "react"
 import * as THREE from "three"
@@ -358,7 +359,6 @@ const MAX_CLICKS = 10
 const PixelBlast: React.FC<PixelBlastProps> = ({
   variant = "square",
   pixelSize = 3,
-  color = "#B497CF",
   className,
   style,
   antialias = true,
@@ -379,6 +379,8 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
   edgeFade = 0.5,
   noiseAmount = 0,
 }) => {
+  const { resolvedTheme } = useTheme()
+  const color = resolvedTheme === "light" ? "#ffffff" : "#000000"
   const containerRef = useRef<HTMLDivElement | null>(null)
   const visibilityRef = useRef({ visible: true })
   const speedRef = useRef(speed)
@@ -456,8 +458,11 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
         alpha: true,
         powerPreference: "high-performance",
       })
+      renderer.domElement.style.position = "absolute"
+      renderer.domElement.style.inset = "0"
       renderer.domElement.style.width = "100%"
       renderer.domElement.style.height = "100%"
+      renderer.domElement.style.display = "block"
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
       container.appendChild(renderer.domElement)
       if (transparent) renderer.setClearAlpha(0)
@@ -499,9 +504,7 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
       const quad = new THREE.Mesh(quadGeom, material)
       scene.add(quad)
       const clock = new THREE.Clock()
-      const setSize = () => {
-        const w = container.clientWidth || 1
-        const h = container.clientHeight || 1
+      const setSize = (w: number, h: number) => {
         renderer.setSize(w, h, false)
         uniforms.uResolution.value.set(
           renderer.domElement.width,
@@ -514,8 +517,16 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
           )
         uniforms.uPixelSize.value = pixelSize * renderer.getPixelRatio()
       }
-      setSize()
-      const ro = new ResizeObserver(setSize)
+      setSize(container.clientWidth || 1, container.clientHeight || 1)
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect
+          setSize(
+            Math.max(1, Math.round(width)),
+            Math.max(1, Math.round(height))
+          )
+        }
+      })
       ro.observe(container)
       const randomFloat = (): number => {
         if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
