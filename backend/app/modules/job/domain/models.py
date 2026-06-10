@@ -109,6 +109,7 @@ class JobPublic(JobBase):
 
 
 class JobMarketplaceRedacted(SQLModel):
+    # class JobMarketplaceRedacted(JobBase):
     id: uuid.UUID
     # created_by_id: uuid.UUID
     created_at: datetime
@@ -121,9 +122,24 @@ class JobMarketplaceRedacted(SQLModel):
     lead_price: float
     estimated_payout: float
     max_buyers: int
+    urgency: Urgency
     # dropoff_location: str
 
     @computed_field
     @property
     def purchase_count(self) -> int:
         return len(self.lead_purchases) if self.lead_purchases else 0
+
+
+class JobMarketplacePartial(JobMarketplaceRedacted):
+    vehicle_class: VehicleClass
+    vehicle_make_model: str
+    is_drivable: bool
+
+
+class JobMarketplaceFull(JobMarketplacePartial):
+    vehicle_reg: str
+    pickup_location: str
+    pickup_area: str
+    dropoff_location: str | None = None
+    description: str | None = None

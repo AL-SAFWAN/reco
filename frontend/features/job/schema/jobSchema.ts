@@ -54,6 +54,7 @@ export const jobSchema = z.object({
   max_buyers: z.number().default(1).optional().nullable(),
   purchase_count: z.number().default(0).optional().nullable(),
   closed_at: z.string().optional().nullable(),
+  purchased: z.boolean().default(false),
 })
 
 export const jobCreateSchema = z.object({

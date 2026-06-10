@@ -6,15 +6,21 @@ import { Badge } from "@/components/ui/badge"
 import { Status } from "@/lib/job-data"
 import { Job } from "../../schema/jobSchema"
 
-export function StatusBadge({ status }: { status: Status }) {
+export function StatusBadge({
+  status,
+  purchased,
+}: {
+  status: Status
+  purchased: boolean
+}) {
   const styles: Record<Status, string> = {
     open: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
     closed: "bg-secondary text-secondary-foreground",
     // completed: "bg-muted text-muted-foreground",
   }
   const labels: Record<Status, string> = {
-    open: "Open",
-    closed: "Closed",
+    open: purchased ? "Purchased" : "Open",
+    closed: purchased ? "Purchased" : "Closed",
   }
   return (
     <Badge
@@ -69,7 +75,7 @@ export function JobCard({
             )}
           </div>
         </div>
-        <StatusBadge status={job.lead_status} />
+        <StatusBadge status={job.lead_status} purchased={job.purchased} />
       </div>
 
       {/* Service type */}
@@ -83,19 +89,27 @@ export function JobCard({
           <Clock className="size-3.5" />
           {formatRelativeTime(job.created_at)}
         </span>
-        <span className="inline-flex items-center gap-1">
-          <Car className="size-3.5" />
-          {job.vehicle_make_model}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <Navigation className="size-3.5" />
-          {job.distance_miles} mi
-        </span>
+        {job.vehicle_make_model && (
+          <span className="inline-flex items-center gap-1">
+            <Car className="size-3.5" />
+            {job.vehicle_make_model}
+          </span>
+        )}
+        {job.distance_miles && (
+          <span className="inline-flex items-center gap-1">
+            <Navigation className="size-3.5" />
+            {job.distance_miles} mi
+          </span>
+        )}
       </div>
 
       <div className="mt-1.5 flex items-start gap-1 text-xs text-muted-foreground">
-        <MapPin className="mt-0.5 size-3.5 shrink-0" />
-        <span className="line-clamp-1">{job.pickup_location}</span>
+        {job.pickup_location && (
+          <>
+            <MapPin className="mt-0.5 size-3.5 shrink-0" />
+            <span className="line-clamp-1">{job.pickup_location}</span>
+          </>
+        )}
       </div>
 
       {/* Price row */}

@@ -1,8 +1,8 @@
 "use client"
-import { Button } from "@/components/ui/button"
 import { NavMenu } from "@/components/nav-menu"
 import { NavigationSheet } from "@/components/navigation-sheet"
 import { UserNav } from "@/features/job/post/components/user-nav"
+import { TokenBalance } from "@/components/token-balance"
 
 const Navbar = () => {
   return (
@@ -17,12 +17,14 @@ const Navbar = () => {
           </p>
         </div>
         {/* Desktop Menu */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-4 md:flex">
           <NavMenu />
+          <TokenBalance />
           <UserNav />
         </div>
 
         <div className="flex items-center gap-3 md:hidden">
+          <TokenBalance compact />
           <NavigationSheet />
           <UserNav />
         </div>

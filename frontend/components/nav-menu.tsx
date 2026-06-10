@@ -9,13 +9,14 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
-import { HomeIcon, RssIcon, BriefcaseIcon } from "lucide-react"
+import { HomeIcon, RssIcon, BriefcaseIcon, WalletIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/feed", label: "Feed", icon: RssIcon },
   { href: "/posting", label: "Jobs", icon: BriefcaseIcon },
+  { href: "/billing", label: "Billing", icon: WalletIcon },
 ]
 
 export const NavMenu = ({

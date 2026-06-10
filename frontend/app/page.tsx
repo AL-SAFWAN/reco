@@ -7,6 +7,7 @@ import {
   BriefcaseIcon,
   ChevronRightIcon,
   CircleDollarSignIcon,
+  Clock,
   MapPinIcon,
   RssIcon,
   ZapIcon,
@@ -20,7 +21,7 @@ import {
   useSavedJobsQuery,
 } from "@/features/job/hooks/job"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatRelativeTime } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -378,13 +379,11 @@ function Dashboard() {
                         {job.service_type}
                       </p>
                       <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPinIcon className="size-3 shrink-0" />
-                        {job.pickup_area}
+                        <Clock className="size-3 shrink-0" />
+
+                        {formatRelativeTime(job.created_at)}
                       </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {job.vehicle_make_model}
-                    </p>
                   </Link>
                 ))}
               </div>

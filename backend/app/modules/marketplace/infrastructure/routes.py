@@ -14,14 +14,18 @@ from app.modules.marketplace.domain.models import (
     LeadPurchasePublic,
     SavedJobPublic,
 )
-from app.modules.job.domain.models import JobMarketplaceRedacted
+from app.modules.job.domain.models import (
+    JobMarketplaceRedacted,
+    JobMarketplacePartial,
+    JobMarketplaceFull,
+)
 
 router = APIRouter()
 
 
 @router.get(
     "/",
-    response_model=list[JobMarketplaceRedacted],
+    # response_model=list[JobMarketplaceRedacted],
 )
 def list_jobs(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 200
@@ -30,9 +34,25 @@ def list_jobs(
     result = []
     for job in jobs:
         purchased = any(p.buyer_id == current_user.id for p in job.lead_purchases)
-        result.append(
-            JobMarketplaceRedacted.model_validate(job, update={"purchased": purchased})
-        )
+        if purchased:
+            if job.lead_status == "closed":
+                result.append(
+                    JobMarketplaceFull.model_validate(
+                        job, update={"purchased": purchased}
+                    )
+                )
+            else:
+                result.append(
+                    JobMarketplacePartial.model_validate(
+                        job, update={"purchased": purchased}
+                    )
+                )
+        else:
+            result.append(
+                JobMarketplaceRedacted.model_validate(
+                    job, update={"purchased": purchased}
+                )
+            )
     return result
 
 
