@@ -115,6 +115,7 @@ export const useUser = () => {
   return useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
+    retry: false, // Don't retry on failure (e.g., if not authenticated)
     staleTime: 1000 * 60 * 60, // Data stays fresh for 1 hour
   })
 }

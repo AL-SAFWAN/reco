@@ -3,6 +3,7 @@
 import { useState } from "react"
 import {
   CheckIcon,
+  Coins,
   CoinsIcon,
   InfoIcon,
   ReceiptIcon,
@@ -20,6 +21,7 @@ import {
   type TokenPackage,
   type TokenTransaction,
 } from "@/features/tokens/hooks/tokens"
+import { MetricTile } from "@/components/ui/metric-tile"
 
 function PackCard({
   pack,
@@ -193,33 +195,31 @@ export default function BillingPage() {
 
   return (
     <div>
-      <div className="bg-foreground px-4 py-10 sm:px-6">
+      <div className="bg-foreground px-4 py-10 sm:px-6 sm:py-10.5">
         <div className="mx-auto max-w-4xl">
-          <p className="mb-1 text-sm font-medium text-background/50">Account</p>
           <h1 className="text-4xl font-black tracking-tight text-background sm:text-5xl">
             Billing
           </h1>
-          <p className="mt-2 text-sm text-background/40">
+          <p className="mt-2 mb-8 text-sm text-background/40">
             Manage your token balance and top-up your account.
           </p>
-          <div className="mt-8 inline-flex items-center gap-4 rounded-2xl bg-background/10 px-6 py-4">
-            <CoinsIcon className="size-8 text-amber-400" />
-            <div>
-              <p className="text-[11px] font-semibold tracking-widest text-background/50 uppercase">
-                Current Balance
-              </p>
-              {balanceLoading ? (
-                <Skeleton className="mt-1 h-10 w-24 bg-background/20" />
-              ) : (
-                <p className="text-4xl font-black text-background tabular-nums">
-                  {balance}
-                  <span className="ml-2 text-lg font-medium text-background/50">
-                    tokens
-                  </span>
-                </p>
-              )}
-            </div>
-          </div>
+
+          <MetricTile
+            label="Current Balance"
+            value={
+              <span className="inline-flex items-center gap-1 text-3xl font-black text-background tabular-nums">
+                {balanceLoading ? (
+                  <Skeleton className="mt-1 h-7 w-24 bg-background/20" />
+                ) : (
+                  <>
+                    <Coins />
+                    {balance}
+                  </>
+                )}
+              </span>
+            }
+            sub="tokens available"
+          />
         </div>
       </div>
 
@@ -228,12 +228,7 @@ export default function BillingPage() {
           <div className="flex items-start gap-3">
             <InfoIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <div className="space-y-1 text-sm text-muted-foreground">
-              <p>
-                <span className="font-semibold text-foreground">
-                  1 token = 1 job lead purchase.
-                </span>{" "}
-                Tokens are deducted when you buy a lead. They never expire.
-              </p>
+              <p>Tokens are deducted when you buy a lead. They never expire.</p>
               <p>
                 All prices shown are exclusive of VAT. VAT at 20% is added at
                 checkout.

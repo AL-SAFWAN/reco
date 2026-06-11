@@ -24,30 +24,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn, formatRelativeTime } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-
-// ── Helpers ────────────────────────────────────────────────────────
-
-function MetricTile({
-  label,
-  value,
-  sub,
-}: {
-  label: string
-  value: string | number
-  sub?: string
-}) {
-  return (
-    <div className="flex flex-col gap-0.5 border-r border-background/15 pr-6 last:border-0 last:pr-0">
-      <span className="text-[11px] font-semibold tracking-widest text-background/50 uppercase">
-        {label}
-      </span>
-      <span className="text-3xl font-black text-background tabular-nums">
-        {value}
-      </span>
-      {sub && <span className="text-xs text-background/40">{sub}</span>}
-    </div>
-  )
-}
+import { MetricTile } from "../components/ui/metric-tile"
 
 function ActionCard({
   href,
@@ -168,7 +145,7 @@ function Dashboard() {
   return (
     <div>
       {/* ── Hero ──────────────────────────────────────────────────── */}
-      <div className="bg-foreground px-4 py-10 sm:px-6">
+      <div className="bg-foreground px-4 py-10 sm:px-6 sm:py-11">
         <div className="mx-auto max-w-6xl">
           <p className="mb-1 text-sm font-medium text-background/50">
             Good{" "}
@@ -271,7 +248,13 @@ function Dashboard() {
                       <ActivityRow
                         key={job.id}
                         title={job.service_type}
-                        meta={`${job.pickup_area} · ${job.vehicle_make_model}`}
+                        meta={
+                          job?.pickup_area
+                            ? `${job.pickup_area} · ${job.vehicle_make_model} · ${formatRelativeTime(job.created_at)}`
+                            : job.vehicle_make_model
+                              ? `${job.vehicle_make_model} · ${formatRelativeTime(job.created_at)}`
+                              : formatRelativeTime(job.created_at)
+                        }
                         dot={job.lead_status === "open" ? "green" : "gray"}
                         right={
                           <span className="inline-flex shrink-0 items-center text-xs font-semibold text-foreground tabular-nums">
@@ -317,7 +300,13 @@ function Dashboard() {
                       <ActivityRow
                         key={job.id}
                         title={job.service_type}
-                        meta={`${job.pickup_area} · ${job.vehicle_make_model}`}
+                        meta={
+                          job?.pickup_area
+                            ? `${job.pickup_area} · ${job.vehicle_make_model} · ${formatRelativeTime(job.created_at)}`
+                            : job.vehicle_make_model
+                              ? `${job.vehicle_make_model} · ${formatRelativeTime(job.created_at)}`
+                              : formatRelativeTime(job.created_at)
+                        }
                         dot="green"
                         right={
                           <div className="flex flex-col items-end gap-0.5">
