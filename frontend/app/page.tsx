@@ -201,13 +201,13 @@ function Dashboard() {
               dark
             />
             <ActionCard
-              href="/posting"
+              href="/posting?create=true"
               icon={BriefcaseIcon}
               title="Post a Job"
               description="Create a new recovery lead listing"
             />
             <ActionCard
-              href="/feed"
+              href="/feed?saved_only=true"
               icon={BookmarkIcon}
               title="Saved Jobs"
               description={`${savedJobs.length} job${savedJobs.length === 1 ? "" : "s"} bookmarked`}
@@ -224,7 +224,7 @@ function Dashboard() {
                 Saved Jobs
               </h2>
               <Link
-                href="/feed"
+                href="/feed?saved_only=true"
                 className="flex items-center gap-1 text-xs font-medium text-foreground hover:underline"
               >
                 See all <ChevronRightIcon className="size-3" />
@@ -276,7 +276,7 @@ function Dashboard() {
                 Purchased Leads
               </h2>
               <Link
-                href="/feed"
+                href="/feed?purchased_only=true"
                 className="flex items-center gap-1 text-xs font-medium text-foreground hover:underline"
               >
                 See all <ChevronRightIcon className="size-3" />
@@ -335,7 +335,7 @@ function Dashboard() {
                 Latest Open Jobs
               </h2>
               <Link
-                href="/feed"
+                href="/feed?open_only=true"
                 className="flex items-center gap-1 text-xs font-medium text-foreground hover:underline"
               >
                 View all <ChevronRightIcon className="size-3" />
@@ -346,7 +346,7 @@ function Dashboard() {
                 {openJobs.slice(0, 6).map((job) => (
                   <Link
                     key={job.id}
-                    href="/feed"
+                    href="/feed?open_only=true"
                     className="group flex w-48 shrink-0 flex-col gap-3 rounded-2xl border bg-card p-4 transition-colors hover:border-foreground/30 hover:bg-accent/40"
                   >
                     <div className="flex items-center justify-between">

@@ -3,7 +3,9 @@ import clientFetcher from "@/fetcher/client.fetcher"
 import {
   Job,
   JobCreate,
+  JobCustomerUpdate,
   JobUpdate,
+  JobUpdateLog,
   Lead,
 } from "@/features/job/schema/jobSchema"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -176,3 +178,77 @@ export const useUnsaveJobMutation = () => {
     },
   })
 }
+
+// ── Customer edit-link (public, no auth) ─────────────────────────
+
+const fetchJobForCustomer = (token: string): Promise<Job> =>
+  clientFetcher(`${JOBS_URL}/customer/${token}`, { method: "GET" })
+
+const updateJobAsCustomer = ({
+  token,
+  body,
+}: {
+  token: string
+  body: JobCustomerUpdate
+}): Promise<Job> =>
+  clientFetcher(`${JOBS_URL}/customer/${token}`, { method: "PATCH", body })
+
+export const useJobForCustomerQuery = (token: string) =>
+  useQuery({
+    queryKey: ["customer-job", token],
+    queryFn: () => fetchJobForCustomer(token),
+    enabled: !!token,
+    retry: false,
+  })
+
+export const useUpdateJobAsCustomerMutation = (token: string) => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: JobCustomerUpdate) =>
+      updateJobAsCustomer({ token, body }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["customer-job", token], data)
+      queryClient.invalidateQueries({
+        queryKey: ["customer-job", token, "changelog"],
+      })
+      toast.success("Details updated successfully")
+    },
+    onError: () => {
+      toast.error("Could not save changes. The link may have expired.")
+    },
+  })
+}
+
+// ── Send / resend edit link (provider action) ─────────────────────
+
+const sendEditLink = (jobId: string): Promise<void> =>
+  clientFetcher(`${JOBS_URL}/${jobId}/send-edit-link`, { method: "POST" })
+
+export const useSendEditLinkMutation = () =>
+  useMutation({
+    mutationFn: sendEditLink,
+    onSuccess: () => toast.success("Edit link sent to customer"),
+    onError: () => toast.error("Could not send edit link"),
+  })
+
+// ── Changelog ─────────────────────────────────────────────────────
+
+const fetchChangelog = (jobId: string): Promise<JobUpdateLog[] | null> =>
+  clientFetcher(`${JOBS_URL}/${jobId}/changelog`, { method: "GET" })
+
+export const useJobChangelogQuery = (jobId: string | undefined) =>
+  useQuery({
+    queryKey: ["jobs", jobId, "changelog"],
+    queryFn: () => fetchChangelog(jobId!),
+    enabled: !!jobId,
+  })
+
+const fetchChangelogForCustomer = (token: string): Promise<JobUpdateLog[]> =>
+  clientFetcher(`${JOBS_URL}/customer/${token}/changelog`, { method: "GET" })
+
+export const useJobChangelogForCustomerQuery = (token: string) =>
+  useQuery({
+    queryKey: ["customer-job", token, "changelog"],
+    queryFn: () => fetchChangelogForCustomer(token),
+    enabled: !!token,
+  })

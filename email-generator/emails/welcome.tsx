@@ -14,7 +14,7 @@ import {
   Section,
   Text,
   Tailwind,
-} from "@react-email/componentss";
+} from "@react-email/components";
 import * as React from "react";
 
 interface VercelInviteUserEmailProps {
@@ -94,31 +94,6 @@ export const VercelInviteUserEmail = ({
             >
               Complete Your Account
             </Button>
-            {/* Divider */}
-            {/* <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" /> */}
-
-            {/* MindBody Account Information */}
-            {/* <Text className="text-black text-[14px] leading-[24px] font-bold">
-              Your MindBody Account Has Been Created
-            </Text> */}
-            {/* <Text className="text-black text-[14px] leading-[24px]">
-              To enhance your experience, we've set up a{" "}
-              <strong>MindBody</strong> account for you using the email address{" "}
-              <em>{email}</em>.
-            </Text> */}
-
-            {/* Support Information */}
-            {/* <Text className="text-black text-[14px] leading-[24px]">
-              If you have any questions or need assistance accessing your
-              MindBody account, feel free to reach out to our support team at{" "}
-              <Link
-                href="mailto:grapple@legiongrappling.com"
-                className="text-blue-600 no-underline"
-              >
-                grapple@legiongrappling.com
-              </Link>
-              .
-            </Text> */}
 
             {/* Divider */}
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full mb-0" />

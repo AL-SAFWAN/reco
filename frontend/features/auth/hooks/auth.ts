@@ -169,11 +169,6 @@ export const useVerifyOTPMutation = () => {
   return useMutation({
     mutationFn: verifyOTP,
     onSuccess: (data) => {
-      toast.success("Account verified", {
-        className:
-          "!border-2 border-green-500 bg-green-500/90 text-destructive-foreground [&>svg]:text-destructive ",
-        description: "We're connecting to MindBody to get your account ready.",
-      })
       queryClient.setQueryData(["user"], data)
     },
     onError(error) {

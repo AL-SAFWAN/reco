@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { JobBoard } from "@/features/job/feed/components/job-board"
 
 export default function Page() {
@@ -5,9 +6,6 @@ export default function Page() {
     <div>
       <div className="bg-foreground px-4 py-10 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          {/* <p className="mb-1 text-sm font-medium text-background/50">
-            Marketplace
-          </p> */}
           <h1 className="text-4xl font-black tracking-tight text-background sm:text-5xl">
             Job Feed
           </h1>
@@ -18,7 +16,9 @@ export default function Page() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <JobBoard />
+        <Suspense>
+          <JobBoard />
+        </Suspense>
       </div>
     </div>
   )

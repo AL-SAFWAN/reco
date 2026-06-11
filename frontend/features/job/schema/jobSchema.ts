@@ -55,6 +55,11 @@ export const jobSchema = z.object({
   purchase_count: z.number().default(0).optional().nullable(),
   closed_at: z.string().optional().nullable(),
   purchased: z.boolean().default(false),
+
+  customer_name: z.string(),
+  customer_email: z.email(),
+  customer_phone: z.string(),
+  send_email_notification: z.boolean(),
 })
 
 export const jobCreateSchema = z.object({
@@ -65,13 +70,20 @@ export const jobCreateSchema = z.object({
   estimated_payout: z.number(),
   distance_miles: z.number(),
   vehicle_class: vehicleClassSchema,
-  vehicle_make_model: z.string().min(1),
-  vehicle_reg: z.string().min(1),
+  vehicle_make_model: z.string().min(1, "Field is required"),
+  vehicle_reg: z.string().min(1, "Field is required"),
   is_drivable: z.boolean(),
-  pickup_location: z.string().min(1),
-  pickup_area: z.string().min(1),
+  pickup_location: z.string().min(1, "Field is required"),
+  pickup_area: z.string().min(1, "Field is required"),
   dropoff_location: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  customer_name: z.string().min(1, "Field is required"),
+  customer_email: z.email("Invalid email format").min(1, "Field is required"),
+  customer_phone: z
+    .string()
+    .min(1, "Field is required")
+    .regex(/^\+?[0-9\s\-]+$/, "Invalid phone number format"),
+  send_email_notification: z.boolean(),
 })
 
 const leads = z.object({
@@ -81,7 +93,31 @@ const leads = z.object({
 
 export const jobUpdateSchema = jobCreateSchema.partial()
 
+export const jobCustomerUpdateSchema = z.object({
+  pickup_location: z.string().min(1, "Required").optional(),
+  dropoff_location: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  customer_name: z.string().min(1, "Required").optional(),
+  customer_phone: z
+    .string()
+    .regex(/^\+?[0-9\s\-]+$/, "Invalid phone number format")
+    .optional(),
+})
+
+export const jobUpdateLogSchema = z.object({
+  id: z.uuid(),
+  job_id: z.uuid(),
+  changed_by: z.string(),
+  changes: z.record(
+    z.string(),
+    z.object({ old: z.unknown().nullable(), new: z.unknown().nullable() })
+  ),
+  changed_at: z.string(),
+})
+
 export type Job = z.infer<typeof jobSchema>
 export type JobCreate = z.infer<typeof jobCreateSchema>
 export type JobUpdate = z.infer<typeof jobUpdateSchema>
+export type JobCustomerUpdate = z.infer<typeof jobCustomerUpdateSchema>
+export type JobUpdateLog = z.infer<typeof jobUpdateLogSchema>
 export type Lead = z.infer<typeof leads>

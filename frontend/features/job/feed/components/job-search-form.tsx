@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { Search } from "lucide-react"
+import { Funnel, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -12,6 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { AREAS } from "@/lib/job-data"
 
 export interface Filters {
@@ -21,6 +29,8 @@ export interface Filters {
   urgency: string
   area: string
   open_only: boolean
+  saved_only: boolean
+  purchased_only: boolean
 }
 
 export const EMPTY_FILTERS: Filters = {
@@ -30,6 +40,8 @@ export const EMPTY_FILTERS: Filters = {
   urgency: "",
   area: "",
   open_only: false,
+  saved_only: false,
+  purchased_only: false,
 }
 
 interface JobSearchFormProps {
@@ -99,6 +111,46 @@ export function JobSearchForm({
           options={AREAS}
           onValueChange={(v) => set({ area: v })}
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="relative gap-2"
+              aria-label="Filter options"
+            >
+              <Funnel className="size-4" />
+              Filters
+              {(filters.open_only || filters.saved_only || filters.purchased_only) && (
+                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-background">
+                  {[filters.open_only, filters.saved_only, filters.purchased_only].filter(Boolean).length}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuLabel>Quick filters</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem
+              checked={filters.open_only}
+              onCheckedChange={(checked) => set({ open_only: checked })}
+            >
+              Open jobs only
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={filters.saved_only}
+              onCheckedChange={(checked) => set({ saved_only: checked })}
+            >
+              Saved jobs
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={filters.purchased_only}
+              onCheckedChange={(checked) => set({ purchased_only: checked })}
+            >
+              Purchased leads
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button type="submit" className="sm:w-32">
           Search jobs
         </Button>

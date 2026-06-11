@@ -146,3 +146,42 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+def generate_job_edit_token(job_id: str) -> str:
+    """Create a 72-hour signed token that lets a customer edit job fields."""
+    delta = timedelta(hours=72)
+    now = datetime.now(timezone.utc)
+    expires = now + delta
+    encoded_jwt = jwt.encode(
+        {"exp": expires.timestamp(), "nbf": now, "sub": job_id, "type": "job_edit"},
+        settings.SECRET_KEY,
+        algorithm="HS256",
+    )
+    return encoded_jwt
+
+
+def verify_job_edit_token(token: str) -> str | None:
+    """Verify a job-edit token; returns the job_id string or None."""
+    try:
+        decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        if decoded.get("type") != "job_edit":
+            return None
+        return str(decoded["sub"])
+    except InvalidTokenError:
+        return None
+
+
+def generate_job_edit_email(customer_name: str, token: str) -> EmailData:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Update your job details"
+    link = f"{settings.FRONTEND_HOST}/job-update/{token}"
+    html_content = render_email_template(
+        template_name="job_edit_link.html",
+        context={
+            "customerName": customer_name,
+            "editLink": link,
+            "validHours": 72,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)

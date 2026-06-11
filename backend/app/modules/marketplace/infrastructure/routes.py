@@ -32,7 +32,9 @@ router = APIRouter()
 def list_jobs(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 200
 ) -> Any:
-    jobs = job_repository.get_jobs(session=session, skip=skip, limit=limit)
+    jobs = job_repository.get_jobs(
+        session=session, skip=skip, limit=limit, exclude_user_id=current_user.id
+    )
     result = []
     for job in jobs:
         purchased = any(p.buyer_id == current_user.id for p in job.lead_purchases)

@@ -1,8 +1,10 @@
+import json
 import uuid
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
-from pydantic import computed_field
+from pydantic import computed_field, EmailStr
 import sqlalchemy as sa
 from sqlmodel import Field, SQLModel, Relationship
 
@@ -62,6 +64,11 @@ class JobBase(SQLModel):
     pickup_area: str = Field(nullable=False)
     dropoff_location: str | None = None
     description: str | None = None
+    # customer
+    customer_name: str | None = Field(default=None)
+    customer_email: EmailStr | None = Field(default=None)
+    customer_phone: str | None = Field(default=None)
+    send_email_notification: bool = Field(default=False, nullable=False)
 
 
 class Job(JobBase, table=True):
@@ -74,7 +81,10 @@ class Job(JobBase, table=True):
             nullable=False,
         ),
     )
-    lead_purchases: list["LeadPurchase"] = Relationship(back_populates="job")
+    lead_purchases: list["LeadPurchase"] = Relationship(
+        back_populates="job",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan", "passive_deletes": True},
+    )
 
 
 # ── Request / Response Schemas ──────────────────────────────────────
@@ -100,6 +110,10 @@ class JobUpdate(SQLModel):
     pickup_area: str | None = None
     dropoff_location: str | None = None
     description: str | None = None
+    customer_name: str | None = None
+    customer_email: EmailStr | None = None
+    customer_phone: str | None = None
+    send_email_notification: bool | None = None
 
 
 class JobPublic(JobBase):
@@ -143,3 +157,60 @@ class JobMarketplaceFull(JobMarketplacePartial):
     pickup_area: str
     dropoff_location: str | None = None
     description: str | None = None
+    customer_name: str | None = None
+    customer_email: EmailStr | None = None
+    customer_phone: str | None = None
+
+
+# ── Customer-facing update (token-authenticated, no login required) ──
+
+
+class JobCustomerUpdate(SQLModel):
+    """Fields a customer can update via their edit-link token."""
+
+    pickup_location: str | None = None
+    dropoff_location: str | None = None
+    description: str | None = None
+    customer_name: str | None = None
+    customer_phone: str | None = None
+
+
+# ── Update log ────────────────────────────────────────────────────
+
+
+class JobUpdateLog(SQLModel, table=True):
+    __tablename__ = "jobupdatelog"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    job_id: uuid.UUID = Field(
+        sa_column=sa.Column(
+            sa.Uuid(),
+            sa.ForeignKey("job.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        )
+    )
+    changed_by: str = Field(nullable=False)
+    changes: str = Field(nullable=False)
+    changed_at: datetime = Field(
+        sa_column=sa.Column(
+            sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        )
+    )
+
+
+class JobUpdateLogPublic(SQLModel):
+    id: uuid.UUID
+    job_id: uuid.UUID
+    changed_by: str
+    changes: dict[str, Any]
+    changed_at: datetime
+
+    @classmethod
+    def from_orm_log(cls, log: "JobUpdateLog") -> "JobUpdateLogPublic":
+        return cls(
+            id=log.id,
+            job_id=log.job_id,
+            changed_by=log.changed_by,
+            changes=json.loads(log.changes),
+            changed_at=log.changed_at,
+        )

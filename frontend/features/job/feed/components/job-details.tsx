@@ -16,8 +16,10 @@ import {
 import { cn, formatRelativeTime } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Job } from "../../schema/jobSchema"
-import { usePurchaseLeadMutation } from "../../hooks/job"
+import { usePurchaseLeadMutation, useJobChangelogQuery } from "../../hooks/job"
 import { StatusBadge } from "./job-card"
+import { JobChangelog } from "../../components/job-changelog"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 const Redacted = ({
   size = "large",
@@ -75,7 +77,12 @@ function Section({
 }) {
   return (
     <section className="space-y-2">
-      <h3 className="text-base font-semibold text-foreground">{title}</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-base font-semibold text-nowrap text-foreground">
+          {title}
+        </h3>
+        <div className="h-px w-full bg-foreground/5" />
+      </div>
       {children}
     </section>
   )
@@ -260,6 +267,13 @@ export function JobDetail({
           </Section>
         )}
 
+        <Section title="Customer">
+          <div className="grid grid-cols-2 gap-3 rounded-2xl">
+            <Detail label="Name" value={job.customer_name} />
+            <Detail label="Email" value={job.customer_email} />
+            <Detail label="Phone" value={job.customer_phone} />
+          </div>
+        </Section>
         <Section title="Vehicle">
           <div className="grid grid-cols-2 gap-3 rounded-2xl">
             <Detail label="Make & model" value={job.vehicle_make_model} />
@@ -321,7 +335,23 @@ export function JobDetail({
             )}
           </div>
         </Section>
+
+        {purchased && <ChangelogSection jobId={job.id} />}
       </div>
     </div>
+  )
+}
+
+// ── Changelog section (purchasers only) ───────────────────────────
+
+function ChangelogSection({ jobId }: { jobId: string }) {
+  const { data: logs = null, isLoading } = useJobChangelogQuery(jobId)
+  return (
+    <Section title="Update log">
+      <ScrollArea className={"h-28"}>
+        <JobChangelog logs={logs} isLoading={isLoading} />
+        <ScrollBar />
+      </ScrollArea>
+    </Section>
   )
 }

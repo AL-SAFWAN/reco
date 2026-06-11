@@ -1,4 +1,5 @@
 "use client"
+import { Suspense } from "react"
 import { DataTable } from "@/features/job/post/components/data-table"
 import { columns } from "@/features/job/post/components/columns"
 import { useJobsQuery } from "@/features/job/hooks/job"
@@ -19,7 +20,9 @@ export default function Page() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <DataTable data={data} columns={columns} />
+        <Suspense>
+          <DataTable data={data} columns={columns} />
+        </Suspense>
       </div>
     </div>
   )
