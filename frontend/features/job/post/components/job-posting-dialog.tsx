@@ -9,7 +9,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LoaderPinwheel, Plus } from "lucide-react"
+import { Coins, LoaderPinwheel, Plus } from "lucide-react"
 import {
   SERVICE_TYPES,
   VEHICLE_CLASSES,
@@ -243,7 +243,11 @@ function JobFormFields({
       {/* Pricing + Distance */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Field data-invalid={!!errors.lead_price}>
-          <FieldLabel htmlFor="lead_price">Lead price (£)</FieldLabel>
+          <FieldLabel htmlFor="lead_price">
+            <span className="inline-flex items-center gap-0.5">
+              Lead price (<Coins className="size-4" />)
+            </span>
+          </FieldLabel>
           <Input
             id="lead_price"
             type="number"

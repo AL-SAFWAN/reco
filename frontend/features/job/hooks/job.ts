@@ -8,6 +8,7 @@ import {
 } from "@/features/job/schema/jobSchema"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useRouter } from "next/dist/client/components/navigation"
 
 const JOBS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/jobs`
 
@@ -110,18 +111,26 @@ export const useUserLeadsQuery = () => {
 
 export const usePurchaseLeadMutation = () => {
   const queryClient = useQueryClient()
+  const router = useRouter()
   return useMutation({
     mutationFn: purchaseLead,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["marketplace", "jobs"] })
       queryClient.invalidateQueries({ queryKey: ["marketplace", "leads"] })
+      queryClient.invalidateQueries({ queryKey: ["tokens", "balance"] })
+      queryClient.invalidateQueries({ queryKey: ["tokens", "transactions"] })
+
       queryClient.invalidateQueries({ queryKey: ["jobs", data.id] })
       toast.success("Lead purchased successfully")
     },
+    onError: (e) => {
+      e.message === "Insufficient tokens"
+        ? toast.error("You do not have enough tokens to purchase this lead.")
+        : toast.error("Could not purchase lead. Please try again.")
+      router.push("/billing")
+    },
   })
 }
-
-// ── Saved Jobs ────────────────────────────────────────────────────
 
 type SavedJob = { job_id: string; saved_at: string }
 

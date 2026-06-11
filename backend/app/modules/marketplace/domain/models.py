@@ -17,6 +17,12 @@ class LeadPurchase(SQLModel, table=True):
     purchased_at: datetime = Field(
         sa_column=sa.Column(sa.DateTime(timezone=True), server_default=sa.func.now())
     )
+    tokens_spent: int | None = Field(default=None, nullable=True)
+    transaction_id: uuid.UUID | None = Field(
+        default=None,
+        foreign_key="tokentransaction.id",
+        nullable=True,
+    )
     job: "Job" = Relationship(back_populates="lead_purchases")
 
 

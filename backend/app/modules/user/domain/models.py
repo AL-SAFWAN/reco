@@ -15,6 +15,11 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
+    __table_args__ = (
+        sa.CheckConstraint(
+            "token_balance >= 0", name="ck_user_token_balance_non_negative"
+        ),
+    )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     created_at: datetime | None = Field(
@@ -25,6 +30,10 @@ class User(UserBase, table=True):
     )
     otp_secret: str
     email_verified: bool = Field(default=False, nullable=True)
+    token_balance: int = Field(
+        default=0,
+        sa_column=sa.Column(sa.Integer, nullable=False, server_default="0"),
+    )
 
 
 class UserCreate(UserBase):
@@ -68,6 +77,7 @@ class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime
     email_verified: bool
+    token_balance: int
 
 
 class UsersPublic(SQLModel):

@@ -8,6 +8,7 @@ import {
   Car,
   CheckCircle2,
   Clock,
+  Coins,
   MapPin,
   Navigation,
   Zap,
@@ -121,7 +122,6 @@ export function JobDetail({
 }) {
   const isOpen = job.lead_status === "open" && !purchased
   const purchaseLeadMutation = usePurchaseLeadMutation()
-  console.log()
   return (
     <div className="flex h-fit flex-col overflow-hidden rounded-2xl border bg-card">
       {/* ── Header ── */}
@@ -185,7 +185,9 @@ export function JobDetail({
               Lead
             </p>
             <p className="mt-0.5 text-2xl font-black text-background">
-              £{job.lead_price}
+              <span className="inline-flex items-center gap-0.5">
+                <Coins className="size-4" /> {job.lead_price}
+              </span>
             </p>
           </div>
           <div className="rounded-xl bg-background/10 px-3 py-2.5">
@@ -212,11 +214,22 @@ export function JobDetail({
             <Button
               className="min-w-40 bg-background text-foreground hover:bg-background/90"
               disabled={!isOpen || purchaseLeadMutation.isPending}
-              onClick={() => purchaseLeadMutation.mutate(job.id)}
+              onClick={() =>
+                purchaseLeadMutation.mutate(job.id, {
+                  onError: () => {},
+                })
+              }
             >
-              {isOpen
-                ? `Buy this job · £${job.lead_price}`
-                : "No longer available"}
+              {isOpen ? (
+                <span className="inline-flex items-center gap-0.5">
+                  Buy this job ·{" "}
+                  <span className="inline-flex items-center">
+                    <Coins className="size-3" /> {job.lead_price}{" "}
+                  </span>
+                </span>
+              ) : (
+                "No longer available"
+              )}
             </Button>
           )}
           <Button

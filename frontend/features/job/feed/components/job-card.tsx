@@ -1,6 +1,6 @@
 "use client"
 
-import { Car, Clock, MapPin, Navigation, Zap } from "lucide-react"
+import { Car, Clock, Coins, MapPin, Navigation, Zap } from "lucide-react"
 import { cn, formatRelativeTime } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Status } from "@/lib/job-data"
@@ -118,8 +118,8 @@ export function JobCard({
           <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
             Lead price
           </p>
-          <p className="text-lg font-black text-foreground">
-            £{job.lead_price}
+          <p className="inline-flex items-center gap-0.5 text-lg font-black text-foreground">
+            <Coins className="size-4" /> {job.lead_price}
           </p>
         </div>
         <div className="text-right">

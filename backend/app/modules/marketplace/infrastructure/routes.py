@@ -1,7 +1,8 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
+from sqlalchemy.exc import IntegrityError
 
 from app.modules.deps import (
     CurrentUser,
@@ -19,6 +20,7 @@ from app.modules.job.domain.models import (
     JobMarketplacePartial,
     JobMarketplaceFull,
 )
+from app.modules.tokens.infrastructure import repository as token_repository
 
 router = APIRouter()
 
@@ -75,19 +77,39 @@ def list_leads(
 def create_lead(
     *, session: SessionDep, job_id: uuid.UUID, current_user: CurrentUser
 ) -> Any:
-    leads = repository.get_leads(session=session, job_id=job_id)
     job = job_repository.get_job(session=session, job_id=job_id)
-    if any(lead.buyer_id == current_user.id for lead in leads):
-        raise HTTPException(status_code=400, detail="Lead already purchased")
-    if len(leads) >= job.max_buyers:
-        raise HTTPException(status_code=400, detail="Maximum number of buyers reached")
-    new_lead = repository.create_lead(
-        session=session,
-        data=LeadPurchase(job_id=job_id, buyer_id=current_user.id),
-    )
-    # check if the total lead is 3 now
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    try:
+        # Debit tokens first (locks user row — race-condition safe)
+        tx, new_balance = token_repository.debit_tokens(
+            session=session,
+            user_id=current_user.id,
+            amount=job.lead_price,
+            reference_id=str(job_id),
+            description=f"Lead purchase · {job.service_type}",
+        )
+    except ValueError:
+        raise HTTPException(status_code=402, detail="Insufficient tokens")
+
+    try:
+        new_lead = repository.create_lead(
+            session=session,
+            data=LeadPurchase(
+                job_id=job_id,
+                buyer_id=current_user.id,
+                tokens_spent=job.lead_price,
+                transaction_id=tx.id,
+            ),
+        )
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=409, detail="You already own this lead")
+
+    # Check if job should be closed
     leads = repository.get_leads(session=session, job_id=job_id)
-    if len(leads) == job.max_buyers:
+    if len(leads) >= job.max_buyers:
         job_repository.update_job(
             session=session,
             db_job=job,

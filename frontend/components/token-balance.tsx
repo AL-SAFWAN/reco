@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { CoinsIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-// Dummy balance — replace with real query when backend is ready
-const DUMMY_TOKEN_BALANCE = 12
+import { useTokenBalanceQuery } from "@/features/tokens/hooks/tokens"
 
 export function TokenBalance({ compact }: { compact?: boolean }) {
+  const { data } = useTokenBalanceQuery()
+  const balance = data?.token_balance ?? 0
+
   return (
     <Link
       href="/billing"
@@ -17,8 +18,8 @@ export function TokenBalance({ compact }: { compact?: boolean }) {
       )}
     >
       <CoinsIcon className="size-3.5 text-amber-500" />
-      <span className="text-foreground">{DUMMY_TOKEN_BALANCE}</span>
-      <span className="text-muted-foreground">tokens</span>
+      <span className="text-foreground">{balance}</span>
+      {!compact && <span className="text-muted-foreground">tokens</span>}
     </Link>
   )
 }

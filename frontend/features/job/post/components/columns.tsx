@@ -6,7 +6,7 @@ import { DataTableColumnHeader } from "./data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Job } from "../../schema/jobSchema"
-import { MapPin } from "lucide-react"
+import { Coins, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { statuses, urgency } from "../../data/data"
 
@@ -184,7 +184,11 @@ export const columns: ColumnDef<Job>[] = [
     cell: ({ row }) => {
       return (
         <div className="hidden flex-col xl:flex">
-          <span className=""> £{row.getValue("lead_price")}</span>
+          <span className="">
+            <span className="inline-flex items-center gap-0">
+              <Coins className="size-3" /> {row.getValue("lead_price")}
+            </span>
+          </span>
         </div>
       )
     },

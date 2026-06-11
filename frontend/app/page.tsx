@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
   CircleDollarSignIcon,
   Clock,
+  Coins,
   MapPinIcon,
   RssIcon,
   ZapIcon,
@@ -273,8 +274,8 @@ function Dashboard() {
                         meta={`${job.pickup_area} · ${job.vehicle_make_model}`}
                         dot={job.lead_status === "open" ? "green" : "gray"}
                         right={
-                          <span className="shrink-0 text-xs font-semibold text-foreground tabular-nums">
-                            £{job.lead_price}
+                          <span className="inline-flex shrink-0 items-center text-xs font-semibold text-foreground tabular-nums">
+                            <Coins className="size-3" /> {job.lead_price}
                           </span>
                         }
                       />
@@ -370,8 +371,8 @@ function Dashboard() {
                           Scheduled
                         </span>
                       )}
-                      <span className="text-xs font-bold text-foreground">
-                        £{job.lead_price}
+                      <span className="inline-flex items-center text-xs font-bold text-foreground">
+                        <Coins className="size-3" /> {job.lead_price}
                       </span>
                     </div>
                     <div>
