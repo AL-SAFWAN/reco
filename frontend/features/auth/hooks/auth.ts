@@ -122,21 +122,13 @@ export const useUser = () => {
   })
 }
 
-const logout = () => {
-  localStorage.removeItem("access_token")
-}
-
-export const useLogoutMutation = () => {
+export const useLogout = () => {
   const queryClient = useQueryClient() // Get the queryClient instance
   const router = useRouter()
 
-  return useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["user"] })
-      router.push("/login")
-    },
-  })
+  localStorage.removeItem("access_token")
+  queryClient.removeQueries({ queryKey: ["user"] })
+  router.push("/login")
 }
 
 const requestOTP = (data: EmailFormInputs) =>

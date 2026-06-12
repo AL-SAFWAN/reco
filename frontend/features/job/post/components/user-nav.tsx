@@ -17,7 +17,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useUser, useLogoutMutation } from "@/features/auth/hooks/auth"
+import { useUser, useLogout } from "@/features/auth/hooks/auth"
 import {
   useNotificationsQuery,
   useNotificationStream,
@@ -26,7 +26,6 @@ import { LogOutIcon } from "lucide-react"
 
 export function UserNav() {
   const { data: user } = useUser()
-  const { mutate: logout } = useLogoutMutation()
 
   const { data: notifications = [] } = useNotificationsQuery()
   useNotificationStream()
@@ -65,7 +64,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
-          onSelect={() => logout()}
+          onSelect={() => useLogout()}
         >
           <LogOutIcon className="mr-2 size-4 stroke-destructive" />
           Log out

@@ -3,14 +3,13 @@
 import React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useLogoutMutation, useUser } from "@/features/auth/hooks/auth"
+import { useLogout, useUser } from "@/features/auth/hooks/auth"
 
 function AuthButton() {
   const { data: user } = useUser()
-  const logout = useLogoutMutation()
 
   const handleLogout = () => {
-    logout.mutate()
+    useLogout()
   }
 
   return (
