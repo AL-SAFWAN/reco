@@ -61,10 +61,11 @@ export const useNotificationStream = () => {
     es.onmessage = (event) => {
       try {
         const incoming: Notification[] = JSON.parse(event.data)
+
         incoming.forEach((n) => {
           if (n.type === "customer_updated") {
             queryClient.invalidateQueries({
-              queryKey: ["job", n.job_id, "changelog"],
+              queryKey: ["jobs", n.job_id, "changelog"],
             })
           }
           if (n.type === "lead_closed") {

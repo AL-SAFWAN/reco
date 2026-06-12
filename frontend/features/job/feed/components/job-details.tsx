@@ -347,11 +347,13 @@ export function JobDetail({
 function ChangelogSection({ jobId }: { jobId: string }) {
   const { data: logs = null, isLoading } = useJobChangelogQuery(jobId)
   return (
-    <Section title="Update log">
-      <ScrollArea className={"h-28"}>
-        <JobChangelog logs={logs} isLoading={isLoading} />
-        <ScrollBar />
-      </ScrollArea>
-    </Section>
+    logs && (
+      <Section title="Update log">
+        <ScrollArea className={"h-28"}>
+          <JobChangelog logs={logs} isLoading={isLoading} />
+          <ScrollBar />
+        </ScrollArea>
+      </Section>
+    )
   )
 }
