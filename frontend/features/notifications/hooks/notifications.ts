@@ -54,8 +54,11 @@ export const useNotificationStream = () => {
   const esRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
-    const url = `${NOTIFICATIONS_URL}stream`
-    const es = new EventSource(url, { withCredentials: true })
+    const token = localStorage.getItem("access_token")
+    if (!token) return
+
+    const url = `${NOTIFICATIONS_URL}stream?token=${encodeURIComponent(token)}`
+    const es = new EventSource(url)
     esRef.current = es
 
     es.onmessage = (event) => {

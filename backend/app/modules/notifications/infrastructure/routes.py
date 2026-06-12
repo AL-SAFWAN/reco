@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 
 from app.core.config import settings
 from app.core.db import async_engine
-from app.modules.deps import CurrentUser, SessionDep
+from app.modules.deps import CurrentUser, CurrentUserFromTokenParam, SessionDep
 from app.modules.notifications.domain.models import Notification, NotificationPublic
 from app.modules.notifications.infrastructure import repository
 
@@ -58,7 +58,9 @@ async def mark_read(session: SessionDep, current_user: CurrentUser) -> None:
 
 
 @router.get("/stream")
-async def notification_stream(current_user: CurrentUser) -> StreamingResponse:
+async def notification_stream(
+    current_user: CurrentUserFromTokenParam,
+) -> StreamingResponse:
     """
     SSE endpoint.  On connect:
       1. Immediately flushes all stored notifications (online + offline catch-up).
