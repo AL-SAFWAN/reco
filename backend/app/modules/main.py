@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.modules.auth.infrastructure import routes as auth
 from app.modules.job.infrastructure import routes as jobs
+from app.modules.notifications.infrastructure import routes as notifications
 from app.modules.user.infrastructure import routes as users
 from app.modules.marketplace.infrastructure import routes as marketplace
 from app.modules.tokens.infrastructure import routes as tokens
@@ -14,3 +15,6 @@ api_router.include_router(
     marketplace.router, prefix="/marketplace", tags=["Marketplace"]
 )
 api_router.include_router(tokens.router, prefix="/tokens", tags=["Tokens"])
+api_router.include_router(
+    notifications.router, prefix="/notifications", tags=["Notifications"]
+)

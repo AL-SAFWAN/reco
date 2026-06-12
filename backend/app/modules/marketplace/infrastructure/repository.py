@@ -1,25 +1,26 @@
 import uuid
 
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.modules.marketplace.domain.models import LeadPurchase, SavedJob
 
 
-def create_lead(
+async def create_lead(
     *,
-    session: Session,
+    session: AsyncSession,
     data: LeadPurchase,
 ) -> LeadPurchase:
     db_lead = LeadPurchase(**data.model_dump())
     session.add(db_lead)
-    session.commit()
-    session.refresh(db_lead)
+    await session.commit()
+    await session.refresh(db_lead)
     return db_lead
 
 
-def get_leads(
+async def get_leads(
     *,
-    session: Session,
+    session: AsyncSession,
     job_id: uuid.UUID | None = None,
     user_id: uuid.UUID | None = None,
     skip: int = 0,
@@ -31,33 +32,39 @@ def get_leads(
     if user_id:
         stmt = stmt.where(LeadPurchase.buyer_id == user_id)
     stmt = stmt.offset(skip).limit(limit)
-    return list(session.exec(stmt).all())
+    result = await session.exec(stmt)
+    return list(result.all())
 
 
 # ── Saved Jobs ────────────────────────────────────────────────────
 
 
-def save_job(*, session: Session, job_id: uuid.UUID, user_id: uuid.UUID) -> SavedJob:
+async def save_job(
+    *, session: AsyncSession, job_id: uuid.UUID, user_id: uuid.UUID
+) -> SavedJob:
     db_saved = SavedJob(job_id=job_id, user_id=user_id)
     session.add(db_saved)
-    session.commit()
-    session.refresh(db_saved)
+    await session.commit()
+    await session.refresh(db_saved)
     return db_saved
 
 
-def unsave_job(*, session: Session, job_id: uuid.UUID, user_id: uuid.UUID) -> bool:
+async def unsave_job(
+    *, session: AsyncSession, job_id: uuid.UUID, user_id: uuid.UUID
+) -> bool:
     stmt = select(SavedJob).where(SavedJob.job_id == job_id, SavedJob.user_id == user_id)
-    db_saved = session.exec(stmt).first()
+    result = await session.exec(stmt)
+    db_saved = result.first()
     if not db_saved:
         return False
-    session.delete(db_saved)
-    session.commit()
+    await session.delete(db_saved)
+    await session.commit()
     return True
 
 
-def get_saved_jobs(
+async def get_saved_jobs(
     *,
-    session: Session,
+    session: AsyncSession,
     user_id: uuid.UUID,
     skip: int = 0,
     limit: int = 200,
@@ -69,9 +76,13 @@ def get_saved_jobs(
         .offset(skip)
         .limit(limit)
     )
-    return list(session.exec(stmt).all())
+    result = await session.exec(stmt)
+    return list(result.all())
 
 
-def is_job_saved(*, session: Session, job_id: uuid.UUID, user_id: uuid.UUID) -> bool:
+async def is_job_saved(
+    *, session: AsyncSession, job_id: uuid.UUID, user_id: uuid.UUID
+) -> bool:
     stmt = select(SavedJob).where(SavedJob.job_id == job_id, SavedJob.user_id == user_id)
-    return session.exec(stmt).first() is not None
+    result = await session.exec(stmt)
+    return result.first() is not None

@@ -1,19 +1,29 @@
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import Session, create_engine, select
 
 from app.core.config import settings
 from app.modules.user.domain.models import User, UserCreate
 from app.modules.user.infrastructure import repository
 
-# Configure engine with optimized settings for performance
+# ── Sync engine — used by Alembic migrations and startup scripts ──
 engine = create_engine(
     str(settings.SQLALCHEMY_DATABASE_URI),
-    # Connection pooling settings for performance
     pool_size=10,
     max_overflow=20,
     pool_pre_ping=True,
     pool_recycle=3600,
-    # Disable echo for production performance
-    # echo=settings.ENVIRONMENT == "local",
+)
+
+# ── Async engine — used by all FastAPI routes ─────────────────────
+_async_url = str(settings.SQLALCHEMY_DATABASE_URI).replace(
+    "postgresql+psycopg", "postgresql+psycopg_async"
+)
+async_engine = create_async_engine(
+    _async_url,
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True,
+    pool_recycle=3600,
 )
 
 

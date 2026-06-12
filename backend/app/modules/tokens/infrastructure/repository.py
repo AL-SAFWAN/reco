@@ -1,6 +1,7 @@
 import uuid
 
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.modules.tokens.domain.models import (
     TokenPackage,
@@ -13,30 +14,33 @@ from app.modules.user.domain.models import User
 # ── Packages ────────────────────────────────────────────────────────────────
 
 
-def get_all_packages(*, session: Session) -> list[TokenPackage]:
-    return list(
-        session.exec(select(TokenPackage).where(TokenPackage.is_active == True)).all()
+async def get_all_packages(*, session: AsyncSession) -> list[TokenPackage]:
+    result = await session.exec(
+        select(TokenPackage).where(TokenPackage.is_active == True)  # noqa: E712
     )
+    return list(result.all())
 
 
-def get_package(*, session: Session, package_id: uuid.UUID) -> TokenPackage | None:
-    return session.get(TokenPackage, package_id)
+async def get_package(
+    *, session: AsyncSession, package_id: uuid.UUID
+) -> TokenPackage | None:
+    return await session.get(TokenPackage, package_id)
 
 
 # ── Balance ─────────────────────────────────────────────────────────────────
 
 
-def get_balance(*, session: Session, user_id: uuid.UUID) -> int:
-    user = session.get(User, user_id)
+async def get_balance(*, session: AsyncSession, user_id: uuid.UUID) -> int:
+    user = await session.get(User, user_id)
     return user.token_balance if user else 0
 
 
 # ── Transactions ─────────────────────────────────────────────────────────────
 
 
-def get_transactions(
+async def get_transactions(
     *,
-    session: Session,
+    session: AsyncSession,
     user_id: uuid.UUID,
     skip: int = 0,
     limit: int = 50,
@@ -48,25 +52,27 @@ def get_transactions(
         .offset(skip)
         .limit(limit)
     )
-    return list(session.exec(stmt).all())
+    result = await session.exec(stmt)
+    return list(result.all())
 
 
-def has_transaction_with_reference(
-    *, session: Session, reference_id: str, category: TransactionCategory
+async def has_transaction_with_reference(
+    *, session: AsyncSession, reference_id: str, category: TransactionCategory
 ) -> bool:
     stmt = select(TokenTransaction).where(
         TokenTransaction.reference_id == reference_id,
         TokenTransaction.category == category,
     )
-    return session.exec(stmt).first() is not None
+    result = await session.exec(stmt)
+    return result.first() is not None
 
 
 # ── Credit (token purchase) ──────────────────────────────────────────────────
 
 
-def credit_tokens(
+async def credit_tokens(
     *,
-    session: Session,
+    session: AsyncSession,
     user_id: uuid.UUID,
     amount: int,
     reference_id: str,
@@ -76,25 +82,25 @@ def credit_tokens(
     Idempotent token credit. Locks the user row, increases balance, records transaction.
     Returns (transaction, new_balance). Caller must manage the session transaction.
     """
-    # Idempotency: skip if already credited for this reference
-    if has_transaction_with_reference(
+    if await has_transaction_with_reference(
         session=session,
         reference_id=reference_id,
         category=TransactionCategory.purchase,
     ):
-        user = session.get(User, user_id)
-        # return a dummy transaction object instead of None for simplicity
-        existing = session.exec(
+        user = await session.get(User, user_id)
+        existing_result = await session.exec(
             select(TokenTransaction).where(
                 TokenTransaction.reference_id == reference_id,
                 TokenTransaction.category == TransactionCategory.purchase,
             )
-        ).first()
+        )
+        existing = existing_result.first()
         return existing, user.token_balance
 
     # Lock user row to prevent race conditions
     stmt = select(User).where(User.id == user_id).with_for_update()
-    user = session.exec(stmt).one()
+    result = await session.exec(stmt)
+    user = result.one()
 
     user.token_balance += amount
     session.add(user)
@@ -108,7 +114,7 @@ def credit_tokens(
         description=description or f"Token pack purchase (+{amount} tokens)",
     )
     session.add(tx)
-    session.flush()
+    await session.flush()
 
     return tx, user.token_balance
 
@@ -116,9 +122,9 @@ def credit_tokens(
 # ── Debit (lead purchase) ────────────────────────────────────────────────────
 
 
-def debit_tokens(
+async def debit_tokens(
     *,
-    session: Session,
+    session: AsyncSession,
     user_id: uuid.UUID,
     amount: int,
     reference_id: str,
@@ -128,9 +134,9 @@ def debit_tokens(
     Locks the user row and deducts tokens. Raises ValueError if balance is insufficient.
     Returns (transaction, new_balance). Caller must manage the session transaction.
     """
-    # Lock user row
     stmt = select(User).where(User.id == user_id).with_for_update()
-    user = session.exec(stmt).one()
+    result = await session.exec(stmt)
+    user = result.one()
 
     if user.token_balance < amount:
         raise ValueError("Insufficient tokens")
@@ -147,6 +153,6 @@ def debit_tokens(
         description=description,
     )
     session.add(tx)
-    session.flush()
+    await session.flush()
 
     return tx, user.token_balance

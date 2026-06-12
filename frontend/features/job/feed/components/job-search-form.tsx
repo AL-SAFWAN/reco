@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { Funnel, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AREAS } from "@/lib/job-data"
+import type { ReadonlyURLSearchParams } from "next/navigation"
+import { useRef } from "react"
 
 export interface Filters {
   query: string
@@ -44,10 +44,39 @@ export const EMPTY_FILTERS: Filters = {
   purchased_only: false,
 }
 
+/** Parse URL search params into a Filters object. Single source of truth. */
+export function filtersFromSearchParams(
+  params: ReadonlyURLSearchParams
+): Filters {
+  return {
+    query: params.get("query") ?? "",
+    service_type: params.get("service_type") ?? "",
+    vehicle_class: params.get("vehicle_class") ?? "",
+    urgency: params.get("urgency") ?? "",
+    area: params.get("area") ?? "",
+    open_only: params.get("open_only") === "true",
+    saved_only: params.get("saved_only") === "true",
+    purchased_only: params.get("purchased_only") === "true",
+  }
+}
+
+/** Serialize a Filters object to URLSearchParams. */
+export function filtersToSearchParams(filters: Filters): URLSearchParams {
+  const p = new URLSearchParams()
+  if (filters.query) p.set("query", filters.query)
+  if (filters.service_type) p.set("service_type", filters.service_type)
+  if (filters.vehicle_class) p.set("vehicle_class", filters.vehicle_class)
+  if (filters.urgency) p.set("urgency", filters.urgency)
+  if (filters.area) p.set("area", filters.area)
+  if (filters.open_only) p.set("open_only", "true")
+  if (filters.saved_only) p.set("saved_only", "true")
+  if (filters.purchased_only) p.set("purchased_only", "true")
+  return p
+}
+
 interface JobSearchFormProps {
   filters: Filters
   onChange: (filters: Filters) => void
-  onReset: () => void
 }
 
 function FilterSelect({
@@ -81,13 +110,9 @@ function FilterSelect({
   )
 }
 
-export function JobSearchForm({
-  filters,
-  onChange,
-  onReset,
-}: JobSearchFormProps) {
+export function JobSearchForm({ filters, onChange }: JobSearchFormProps) {
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch })
-
+  const inputRef = useRef<HTMLInputElement>(null)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
@@ -99,10 +124,9 @@ export function JobSearchForm({
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by reference, location, or vehicle"
-            value={filters.query}
-            onChange={(e) => set({ query: e.target.value })}
             className="pl-9"
             aria-label="Search recovery jobs"
+            ref={inputRef}
           />
         </div>
         <FilterSelect
@@ -121,9 +145,17 @@ export function JobSearchForm({
             >
               <Funnel className="size-4" />
               Filters
-              {(filters.open_only || filters.saved_only || filters.purchased_only) && (
+              {(filters.open_only ||
+                filters.saved_only ||
+                filters.purchased_only) && (
                 <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-background">
-                  {[filters.open_only, filters.saved_only, filters.purchased_only].filter(Boolean).length}
+                  {
+                    [
+                      filters.open_only,
+                      filters.saved_only,
+                      filters.purchased_only,
+                    ].filter(Boolean).length
+                  }
                 </span>
               )}
             </Button>
@@ -151,7 +183,13 @@ export function JobSearchForm({
             </DropdownMenuCheckboxItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button type="submit" className="sm:w-32">
+        <Button
+          type="submit"
+          className="sm:w-32"
+          onClick={() =>
+            set(inputRef.current ? { query: inputRef.current.value } : {})
+          }
+        >
           Search jobs
         </Button>
       </div>

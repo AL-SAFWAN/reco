@@ -2,7 +2,8 @@ from typing import Any
 from uuid import UUID
 
 import pyotp
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.modules.user.domain.models import (
     User,
@@ -13,34 +14,36 @@ from app.modules.user.domain.models import (
 )
 
 
-def update_me(*, session: Session, user_in: UserUpdateMe, current_user: User) -> Any:
+async def update_me(
+    *, session: AsyncSession, user_in: UserUpdateMe, current_user: User
+) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
     current_user.sqlmodel_update(user_data)
     session.add(current_user)
-    session.commit()
-    session.refresh(current_user)
+    await session.commit()
+    await session.refresh(current_user)
     return current_user
 
 
-def update_me_password(
-    *, session: Session, current_user: User, new_password: str
+async def update_me_password(
+    *, session: AsyncSession, current_user: User, new_password: str
 ) -> Any:
     from app.modules.auth.domain.service import get_password_hash
 
     hashed_password = get_password_hash(new_password)
     current_user.hashed_password = hashed_password
     session.add(current_user)
-    session.commit()
+    await session.commit()
 
 
-def delete_me(session: Session, current_user: User):
-    # statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    # session.exec(statement)  # type: ignore
-    session.delete(current_user)
-    session.commit()
+async def delete_me(session: AsyncSession, current_user: User):
+    await session.delete(current_user)
+    await session.commit()
 
 
-def create_user(*, session: Session, user_in: UserRegister | UserCreate) -> User:
+async def create_user(
+    *, session: AsyncSession, user_in: UserRegister | UserCreate
+) -> User:
     from app.modules.auth.domain.service import get_password_hash
 
     user_create = UserCreate.model_validate(user_in)
@@ -53,12 +56,14 @@ def create_user(*, session: Session, user_in: UserRegister | UserCreate) -> User
         },
     )
     session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
+    await session.commit()
+    await session.refresh(db_obj)
     return db_obj
 
 
-def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
+async def update_user(
+    *, session: AsyncSession, db_user: User, user_in: UserUpdate
+) -> Any:
     from app.modules.auth.domain.service import get_password_hash
 
     user_data = user_in.model_dump(exclude_unset=True)
@@ -69,35 +74,33 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
         extra_data["hashed_password"] = hashed_password
     db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
+    await session.commit()
+    await session.refresh(db_user)
     return db_user
 
 
-def update_user_email_verified(
-    *, session: Session, user: User, email_verified: bool
+async def update_user_email_verified(
+    *, session: AsyncSession, user: User, email_verified: bool
 ) -> User:
     user.email_verified = email_verified
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     return user
 
 
-def get_user_by_email(*, session: Session, email: str) -> User | None:
+async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None:
     statement = select(User).where(User.email == email)
-    session_user = session.exec(statement).first()
-    return session_user
+    result = await session.exec(statement)
+    return result.first()
 
 
-def get_user_by_id(*, session: Session, id: UUID) -> User | None:
+async def get_user_by_id(*, session: AsyncSession, id: UUID) -> User | None:
     statement = select(User).where(User.id == id)
-    session_user = session.exec(statement).first()
-    return session_user
+    result = await session.exec(statement)
+    return result.first()
 
 
-def delete_user(session: Session, user: User):
-    # statement = delete(Item).where(col(Item.owner_id) == user.id)
-    # session.exec(statement)  # type: ignore
-    session.delete(user)
-    session.commit()
+async def delete_user(session: AsyncSession, user: User):
+    await session.delete(user)
+    await session.commit()

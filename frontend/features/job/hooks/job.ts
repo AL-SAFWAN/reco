@@ -91,6 +91,9 @@ const MARKETPLACE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/marketpla
 const fetchMarketplaceJobs = (): Promise<Job[]> =>
   clientFetcher(`${MARKETPLACE_URL}/`, { method: "GET" })
 
+const fetchMarketplaceJob = (id: string): Promise<Job> =>
+  clientFetcher(`${MARKETPLACE_URL}/${id}`, { method: "GET" })
+
 const fetchUserLeads = (): Promise<Lead[]> =>
   clientFetcher(`${MARKETPLACE_URL}/leads`, { method: "GET" })
 
@@ -101,6 +104,22 @@ export const useMarketplaceJobsQuery = () => {
   return useQuery({
     queryKey: ["marketplace", "jobs"],
     queryFn: fetchMarketplaceJobs,
+  })
+}
+export const useMarketplaceJobQuery = (id: string) => {
+  const queryClient = useQueryClient()
+  return useQuery({
+    queryKey: ["marketplace", "jobs", id],
+    queryFn: () => fetchMarketplaceJob(id),
+    enabled: !!id,
+    // Seed from the list cache so the job renders instantly on navigation,
+    // then revalidates silently in the background — no loading flicker.
+    initialData: () => {
+      const list = queryClient.getQueryData<Job[]>(["marketplace", "jobs"])
+      return list?.find((j) => j.id === id)
+    },
+    initialDataUpdatedAt: () =>
+      queryClient.getQueryState(["marketplace", "jobs"])?.dataUpdatedAt,
   })
 }
 

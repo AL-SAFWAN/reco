@@ -3,7 +3,7 @@ from typing import Any
 
 import jwt
 import pyotp
-from sqlmodel import Session
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.security import ALGORITHM, pwd_context
@@ -14,10 +14,12 @@ from app.modules.email.domain.service import (
 from app.modules.user.domain.models import User
 
 
-def authenticate_user(*, session: Session, email: str, password: str) -> User | None:
+async def authenticate_user(
+    *, session: AsyncSession, email: str, password: str
+) -> User | None:
     from app.modules.user.infrastructure.repository import get_user_by_email
 
-    db_user = get_user_by_email(session=session, email=email)
+    db_user = await get_user_by_email(session=session, email=email)
     if not db_user:
         return None
     if not verify_password(password, db_user.hashed_password):

@@ -1,14 +1,15 @@
 "use client"
 
 import { type Table } from "@tanstack/react-table"
-import { X } from "lucide-react"
+import { Plus, X } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 import { urgency, statuses } from "../../data/data"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
-import { CreateJobDialog } from "./job-posting-dialog"
+
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
 }
@@ -53,7 +54,12 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <div className="flex items-center gap-2">
-        <CreateJobDialog />
+        <Button asChild className="gap-2">
+          <Link href="/posting/create">
+            <Plus className="size-4" />
+            Add Job Posting
+          </Link>
+        </Button>
       </div>
     </div>
   )

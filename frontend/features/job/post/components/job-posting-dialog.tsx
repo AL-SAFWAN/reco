@@ -426,6 +426,76 @@ function JobFormFields({
   )
 }
 
+// ── Create Form (no dialog wrapper — used by the routing-modal pattern) ──────
+
+export function CreateJobForm({
+  onSuccess,
+  onCancel,
+}: {
+  onSuccess: () => void
+  onCancel: () => void
+}) {
+  const { mutate, isPending } = useCreateJobMutation()
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<JobCreate>({
+    resolver: zodResolver(jobCreateSchema),
+    defaultValues: {
+      service_type: "Towing & Transport",
+      urgency: "Immediate",
+      vehicle_class: "Car",
+      is_drivable: true,
+      pickup_area: AREAS[0],
+      lead_price: 10,
+      estimated_payout: 120,
+      distance_miles: 0,
+      customer_name: "",
+      customer_email: "",
+      customer_phone: "",
+      send_email_notification: true,
+    },
+  })
+
+  function onSubmit(data: JobCreate) {
+    mutate(data, {
+      onSuccess: () => {
+        reset()
+        onSuccess()
+      },
+    })
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex min-h-0 flex-1 flex-col"
+    >
+      <JobFormFields register={register} control={control} errors={errors} />
+      <DialogFooter className="mx-0 mb-0 border-t px-6 py-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending && (
+            <LoaderPinwheel className="mr-2 h-4 w-4 animate-spin" />
+          )}
+          {isPending ? "Posting..." : "Post job"}
+        </Button>
+      </DialogFooter>
+    </form>
+  )
+}
+
 // ── Create Dialog ─────────────────────────────────────────────────
 
 export function CreateJobDialog() {
@@ -518,6 +588,209 @@ export function CreateJobDialog() {
         </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+// ── Edit Form (no dialog wrapper — used by the routing-modal pattern) ────────
+
+export function EditJobForm({
+  job,
+  onSuccess,
+  onCancel,
+  page,
+}: {
+  job: Job
+  onSuccess: () => void
+  onCancel: () => void
+  page?: boolean
+}) {
+  const { mutate, isPending } = useUpdateJobMutation()
+  const { mutate: sendEditLink, isPending: isSendingLink } =
+    useSendEditLinkMutation()
+  const { data: changelog = [], isLoading: changelogLoading } =
+    useJobChangelogQuery(job.id)
+  const [closeConfirmOpen, setCloseConfirmOpen] = useState(false)
+  const pendingCloseRef = { onChange: (_v: string) => {} }
+
+  const isAlreadyClosed = job.lead_status === "closed"
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<JobCreate>({
+    resolver: zodResolver(jobCreateSchema),
+    defaultValues: job,
+  })
+
+  function onSubmit(data: JobCreate) {
+    mutate({ id: job.id, body: data }, { onSuccess })
+  }
+
+  return (
+    <>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={
+          "relative flex min-h-0 flex-1 flex-col pt-4" +
+          (page ? " border border-y-0 py-4 pb-0" : "")
+        }
+      >
+        <div className="grid gap-5 overflow-y-auto px-6">
+          {/* Status */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Controller
+              name="lead_status"
+              control={control}
+              render={({ field, fieldState }) => {
+                pendingCloseRef.onChange = field.onChange
+                return (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="lead_status">Status</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      disabled={isAlreadyClosed}
+                      onValueChange={(v) => {
+                        if (v === "closed" && !isAlreadyClosed) {
+                          setCloseConfirmOpen(true)
+                        } else {
+                          field.onChange(v)
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        id="lead_status"
+                        aria-invalid={fieldState.invalid}
+                        className="w-full"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusSchema.options.map((s) => (
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            disabled={isAlreadyClosed && s !== "closed"}
+                          >
+                            {statusLabels[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isAlreadyClosed && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        This job is closed and cannot be re-opened.
+                      </p>
+                    )}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )
+              }}
+            />
+          </div>
+        </div>
+        <JobFormFields register={register} control={control} errors={errors} />
+        {/* Update log */}
+        <Accordion type="single" collapsible className={"border-t"}>
+          <AccordionItem value="item-1" className="px-6 py-2">
+            <AccordionTrigger>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Update log
+                </h3>
+                <div className="h-px flex-1 bg-foreground/5" />
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="">
+              <ScrollArea
+                className={
+                  changelog && changelog.length > 0 ? "h-64" : "h-auto"
+                }
+              >
+                <JobChangelog logs={changelog} isLoading={changelogLoading} />
+                <ScrollBar />
+              </ScrollArea>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        <DialogFooter className={"mx-0 mb-0 px-6 py-4"}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          {job.customer_email && (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={isSendingLink || isPending}
+              onClick={() => sendEditLink(job.id)}
+            >
+              {isSendingLink ? (
+                <LoaderPinwheel className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Link2 className="mr-2 h-4 w-4" />
+              )}
+              {isSendingLink ? "Sending…" : "Resend edit link"}
+            </Button>
+          )}
+          <Button type="submit" disabled={isPending}>
+            {isPending && (
+              <LoaderPinwheel className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            {isPending ? "Saving..." : "Save changes"}
+          </Button>
+        </DialogFooter>
+      </form>
+
+      {/* Close-job confirmation */}
+      <Dialog open={closeConfirmOpen} onOpenChange={setCloseConfirmOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Close this job?</DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  Closing a job is{" "}
+                  <strong className="text-foreground">permanent</strong> — it
+                  cannot be re-opened.
+                </p>
+                <p>
+                  Once closed, any users who have already purchased this lead
+                  will be able to see the full job details. No new purchases
+                  will be accepted.
+                </p>
+                <p>Are you sure you want to close this job?</p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCloseConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                pendingCloseRef.onChange("closed")
+                setCloseConfirmOpen(false)
+              }}
+            >
+              Yes, close job
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

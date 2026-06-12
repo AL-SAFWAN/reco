@@ -1,5 +1,6 @@
 "use client"
 
+import { NotificationMenu } from "@/components/notification-bell"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,27 +9,44 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useUser, useLogoutMutation } from "@/features/auth/hooks/auth"
+import {
+  useNotificationsQuery,
+  useNotificationStream,
+} from "@/features/notifications/hooks/notifications"
 import { LogOutIcon } from "lucide-react"
 
 export function UserNav() {
   const { data: user } = useUser()
   const { mutate: logout } = useLogoutMutation()
 
+  const { data: notifications = [] } = useNotificationsQuery()
+  useNotificationStream()
   const initials = user
     ? `${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase() ||
       user.email[0].toUpperCase()
     : "?"
 
+  const unreadCount = notifications.filter((n) => !n.read).length
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-9 w-9 hover:cursor-pointer">
+        <Avatar className="relative h-9 w-9 hover:cursor-pointer">
           <AvatarImage src="/avatars/03.png" alt={user?.first_name} />
           <AvatarFallback>{initials}</AvatarFallback>
+          {unreadCount > 0 && (
+            <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 p-0 text-[10px] font-bold text-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </div>
+          )}
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
@@ -43,10 +61,7 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
-        </DropdownMenuGroup>
+        <NotificationMenu />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"

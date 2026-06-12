@@ -25,6 +25,7 @@ from app.modules.job.domain.models import Job  # noqa
 from app.modules.user.domain.models import User  # noqa
 from app.modules.marketplace.domain.models import LeadPurchase, SavedJob  # noqa
 from app.modules.tokens.domain.models import TokenTransaction, TokenPackage  # noqa
+from app.modules.notifications.domain.models import Notification  # noqa
 
 target_metadata = SQLModel.metadata
 

@@ -28,7 +28,7 @@ router = APIRouter()
 
 
 @router.post("/login")
-def login(
+async def login(
     response: Response,
     session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -36,7 +36,7 @@ def login(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
-    user = service.authenticate_user(
+    user = await service.authenticate_user(
         session=session, email=form_data.username, password=form_data.password
     )
 
@@ -71,7 +71,7 @@ def login(
 
 
 @router.post("/login/access-token")
-def login_access_token(
+async def login_access_token(
     session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
@@ -79,7 +79,7 @@ def login_access_token(
     OAuth2 compatible token login, get an access token for future requests
     """
 
-    user = service.authenticate_user(
+    user = await service.authenticate_user(
         session=session, email=form_data.username, password=form_data.password
     )
     if not user:
@@ -91,7 +91,7 @@ def login_access_token(
 
 
 @router.post("/login/test-token", response_model=UserPublic)
-def test_token(current_user: CurrentUser) -> Any:
+async def test_token(current_user: CurrentUser) -> Any:
     """
     Test access token
     """
@@ -99,7 +99,7 @@ def test_token(current_user: CurrentUser) -> Any:
 
 
 @router.post("/logout")
-def logout(response: Response):
+async def logout(response: Response):
     """
     Logout the user by removing the access_token cookie.
     """
@@ -127,13 +127,13 @@ def logout(response: Response):
     "/register",
     response_model=UserPublic,
 )
-def create_account(
+async def create_account(
     response: Response, session: SessionDep, user_in: UserRegister
 ) -> Any:
     """
     Create an Account
     """
-    user = user_repository.get_user_by_email(session=session, email=user_in.email)
+    user = await user_repository.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
@@ -146,7 +146,7 @@ def create_account(
             "email_verified": False,
         },
     )
-    user = user_repository.create_user(session=session, user_in=user_create)
+    user = await user_repository.create_user(session=session, user_in=user_create)
 
     if settings.emails_enabled and user_create.email:
         email_data_otp = service.create_otp_email(user)
@@ -194,11 +194,11 @@ def create_account(
 
 
 @router.post("/password-recovery/{email}")
-def recover_password(email: str, session: SessionDep) -> Message:
+async def recover_password(email: str, session: SessionDep) -> Message:
     """
     Password Recovery
     """
-    user = user_repository.get_user_by_email(session=session, email=email)
+    user = await user_repository.get_user_by_email(session=session, email=email)
 
     if not user:
         return Message(message="If an account exists, you will receive an email")
@@ -216,21 +216,21 @@ def recover_password(email: str, session: SessionDep) -> Message:
 
 
 @router.post("/reset-password/")
-def reset_password(session: SessionDep, body: NewPassword) -> Message:
+async def reset_password(session: SessionDep, body: NewPassword) -> Message:
     """
     Reset password
     """
     email = verify_password_reset_token(token=body.token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = user_repository.get_user_by_email(session=session, email=email)
+    user = await user_repository.get_user_by_email(session=session, email=email)
     if not user:
         raise HTTPException(
             status_code=404,
             detail="The user with this email does not exist in the system.",
         )
 
-    user_repository.update_me_password(
+    await user_repository.update_me_password(
         session=session, current_user=user, new_password=body.password
     )
 
@@ -238,18 +238,13 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
 
 
 @router.post("/request-otp/{email}")
-def request_otp(email: str, session: SessionDep) -> Message:
-    user = user_repository.get_user_by_email(session=session, email=email)
+async def request_otp(email: str, session: SessionDep) -> Message:
+    user = await user_repository.get_user_by_email(session=session, email=email)
     if not user:
         raise HTTPException(
             status_code=404,
             detail="The user with this email does not exist in the system.",
         )
-    # if user.email_verified:
-    #     raise HTTPException(
-    #         status_code=404,
-    #         detail="The user with this email is already verified.",
-    #     )
 
     email_data = service.create_otp_email(user)
 
@@ -267,12 +262,9 @@ async def verify_otp(
     body: VerifyOTP,
     current_user: CurrentUser,
 ) -> UserPublic:
-    user = session.get(User, current_user.id)
+    user = await session.get(User, current_user.id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
-    # elif user.email_verified:
-    # raise HTTPException(status_code=400, detail="Email already verified.")
 
     secret = user.otp_secret
     if not secret:
@@ -282,11 +274,9 @@ async def verify_otp(
     if not code_valid:
         raise HTTPException(status_code=400, detail="Invalid or expired OTP.")
 
-    else:
-        # email is verified,
-        user_repository.update_user_email_verified(
-            session=session, user=user, email_verified=True
-        )
+    await user_repository.update_user_email_verified(
+        session=session, user=user, email_verified=True
+    )
     return user
 
 
@@ -299,15 +289,14 @@ async def complete_account(
     """
     Completes the user account
     """
-    db_user = session.get(User, current_user.id)
+    db_user = await session.get(User, current_user.id)
     if not db_user:
         raise HTTPException(
             status_code=404,
             detail="The user with this id does not exist in the system",
         )
 
-    else:
-        updated_user = user_repository.update_me(
-            session=session, user_in=user_in, current_user=db_user
-        )
-        return updated_user
+    updated_user = await user_repository.update_me(
+        session=session, user_in=user_in, current_user=db_user
+    )
+    return updated_user

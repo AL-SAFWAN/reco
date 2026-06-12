@@ -88,18 +88,20 @@ function ActionCard({
 }
 
 function ActivityRow({
+  href,
   title,
   meta,
   right,
   dot,
 }: {
+  href: string
   title: string
   meta: string
   right: React.ReactNode
   dot?: "green" | "gray"
 }) {
-  return (
-    <li className="flex items-center gap-4 py-3.5">
+  const inner = (
+    <>
       <span
         className={cn(
           "mt-0.5 size-2 shrink-0 rounded-full",
@@ -111,7 +113,15 @@ function ActivityRow({
         <p className="truncate text-xs text-muted-foreground">{meta}</p>
       </div>
       {right}
-    </li>
+    </>
+  )
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-4 px-5 py-3.5 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-muted/50"
+    >
+      {inner}
+    </Link>
   )
 }
 
@@ -201,7 +211,7 @@ function Dashboard() {
               dark
             />
             <ActionCard
-              href="/posting?create=true"
+              href="/posting/create"
               icon={BriefcaseIcon}
               title="Post a Job"
               description="Create a new recovery lead listing"
@@ -242,11 +252,12 @@ function Dashboard() {
                   </Button>
                 </div>
               ) : (
-                <ul className="divide-y divide-border px-5">
+                <ul className="divide-y divide-border px-0">
                   {savedJobDetails.map((job) =>
                     job ? (
                       <ActivityRow
                         key={job.id}
+                        href={`/feed/${job.id}`}
                         title={job.service_type}
                         meta={
                           job?.pickup_area
@@ -294,11 +305,12 @@ function Dashboard() {
                   </Button>
                 </div>
               ) : (
-                <ul className="divide-y divide-border px-5">
+                <ul className="divide-y divide-border">
                   {purchasedJobDetails.map((job) =>
                     job ? (
                       <ActivityRow
                         key={job.id}
+                        href={`/feed/${job.id}`}
                         title={job.service_type}
                         meta={
                           job?.pickup_area
@@ -346,7 +358,7 @@ function Dashboard() {
                 {openJobs.slice(0, 6).map((job) => (
                   <Link
                     key={job.id}
-                    href="/feed?open_only=true"
+                    href={`/feed/${job.id}`}
                     className="group flex w-48 shrink-0 flex-col gap-3 rounded-2xl border bg-card p-4 transition-colors hover:border-foreground/30 hover:bg-accent/40"
                   >
                     <div className="flex items-center justify-between">

@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
 
 from app.modules.deps import (
     CurrentUser,
@@ -22,6 +22,10 @@ from app.modules.job.domain.models import (
     JobUpdate,
     JobUpdateLogPublic,
     LeadStatus,
+)
+from app.modules.notifications.domain.models import NotificationType
+from app.modules.notifications.infrastructure.repository import (
+    create_notification_and_notify,
 )
 
 router = APIRouter()
@@ -53,11 +57,10 @@ def _send_customer_edit_link(job: Job) -> None:
     "/",
     response_model=list[Job],
 )
-def list_jobs(
+async def list_jobs(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 200
 ) -> Any:
-    print("Listing jobs with skip:", skip, "and limit:", limit)
-    return repository.get_jobs(
+    return await repository.get_jobs(
         session=session, user_id=current_user.id, skip=skip, limit=limit
     )
 
@@ -66,10 +69,10 @@ def list_jobs(
     "/",
     response_model=JobPublic,
 )
-def create_job(
+async def create_job(
     *, session: SessionDep, body: JobCreate, current_user: CurrentUser
 ) -> Any:
-    job = repository.create_job(
+    job = await repository.create_job(
         session=session, data=Job(**body.model_dump(), created_by_id=current_user.id)
     )
     if job.send_email_notification and job.customer_email:
@@ -86,7 +89,7 @@ def create_job(
 
 
 @router.get("/customer/{token}", response_model=JobPublic)
-def get_job_for_customer(*, token: str, session: SessionDep) -> Any:
+async def get_job_for_customer(*, token: str, session: SessionDep) -> Any:
     """Return editable job fields using a signed edit-link token."""
     job_id_str = verify_job_edit_token(token)
     if not job_id_str:
@@ -95,20 +98,20 @@ def get_job_for_customer(*, token: str, session: SessionDep) -> Any:
         job_id = uuid.UUID(job_id_str)
     except ValueError:
         raise HTTPException(status_code=400, detail="Malformed token")
-    job = repository.get_job_public(session=session, job_id=job_id)
+    job = await repository.get_job_public(session=session, job_id=job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
 
 
 @router.patch("/customer/{token}", response_model=JobPublic)
-def update_job_as_customer(
+async def update_job_as_customer(
     *,
     token: str,
     body: JobCustomerUpdate,
     session: SessionDep,
 ) -> Any:
-    """Customer updates their job fields; changes are logged."""
+    """Customer updates their job fields; changes are logged and buyers/poster are notified."""
     job_id_str = verify_job_edit_token(token)
     if not job_id_str:
         raise HTTPException(status_code=401, detail="Invalid or expired link")
@@ -117,7 +120,7 @@ def update_job_as_customer(
     except ValueError:
         raise HTTPException(status_code=400, detail="Malformed token")
 
-    job = repository.get_job_public(session=session, job_id=job_id)
+    job = await repository.get_job_public(session=session, job_id=job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
 
@@ -130,21 +133,55 @@ def update_job_as_customer(
     for field, value in update_data.items():
         setattr(job, field, value)
     session.add(job)
-    session.commit()
-    session.refresh(job)
 
-    repository.create_update_log(
-        session=session,
+    # Log the change
+    from app.modules.job.domain.models import JobUpdateLog
+    import json as _json
+
+    changes = {
+        field: {"old": old_snapshot.get(field), "new": update_data[field]}
+        for field in update_data
+        if update_data[field] != old_snapshot.get(field)
+    }
+    log = JobUpdateLog(
         job_id=job_id,
         changed_by="customer",
-        old_values=old_snapshot,
-        new_values=update_data,
+        changes=_json.dumps(changes),
     )
+    session.add(log)
+
+    # Notify job poster
+    notif_payload = {
+        "service_type": job.service_type,
+        "fields_changed": list(update_data.keys()),
+    }
+    await create_notification_and_notify(
+        session=session,
+        user_id=job.created_by_id,
+        notification_type=NotificationType.customer_updated,
+        job_id=job_id,
+        payload=notif_payload,
+    )
+
+    # Notify all buyers if closed
+    if job.lead_status == LeadStatus.closed:
+        for purchase in job.lead_purchases:
+            if purchase.buyer_id != job.created_by_id:
+                await create_notification_and_notify(
+                    session=session,
+                    user_id=purchase.buyer_id,
+                    notification_type=NotificationType.customer_updated,
+                    job_id=job_id,
+                    payload=notif_payload,
+                )
+
+    await session.commit()
+    await session.refresh(job)
     return job
 
 
 @router.get("/customer/{token}/changelog", response_model=list[JobUpdateLogPublic])
-def get_job_changelog_for_customer(*, token: str, session: SessionDep) -> Any:
+async def get_job_changelog_for_customer(*, token: str, session: SessionDep) -> Any:
     """Return the update history using the customer edit-link token (no auth required)."""
     job_id_str = verify_job_edit_token(token)
     if not job_id_str:
@@ -154,7 +191,7 @@ def get_job_changelog_for_customer(*, token: str, session: SessionDep) -> Any:
     except ValueError:
         raise HTTPException(status_code=400, detail="Malformed token")
 
-    logs = repository.get_update_logs(session=session, job_id=job_id)
+    logs = await repository.get_update_logs(session=session, job_id=job_id)
     return [JobUpdateLogPublic.from_orm_log(log) for log in logs]
 
 
@@ -162,22 +199,29 @@ def get_job_changelog_for_customer(*, token: str, session: SessionDep) -> Any:
 
 
 @router.get("/{job_id}", response_model=JobPublic)
-def read_job(job_id: uuid.UUID, session: SessionDep, current_user: CurrentUser) -> Any:
-    job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
+@router.get("/{job_id}", response_model=JobPublic)
+async def read_job(
+    job_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+) -> Any:
+    job = await repository.get_job(
+        session=session, user_id=current_user.id, job_id=job_id
+    )
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
 
 
 @router.patch("/{job_id}", response_model=JobPublic)
-def update_job(
+async def update_job(
     *,
     job_id: uuid.UUID,
     body: JobUpdate,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Any:
-    db_job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
+    db_job = await repository.get_job(
+        session=session, user_id=current_user.id, job_id=job_id
+    )
     if not db_job:
         raise HTTPException(status_code=404, detail="Job not found")
 
@@ -191,21 +235,23 @@ def update_job(
             detail="A closed job cannot be re-opened.",
         )
 
-    return repository.update_job(session=session, db_job=db_job, updates=body)
+    return await repository.update_job(session=session, db_job=db_job, updates=body)
 
 
 @router.delete("/{job_id}", status_code=204)
-def delete_job(
+async def delete_job(
     *,
     job_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Response:
-    db_job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
+    db_job = await repository.get_job(
+        session=session, user_id=current_user.id, job_id=job_id
+    )
     if not db_job:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    repository.delete_job(session=session, db_job=db_job)
+    await repository.delete_job(session=session, db_job=db_job)
     return Response(status_code=204)
 
 
@@ -213,14 +259,16 @@ def delete_job(
 
 
 @router.post("/{job_id}/send-edit-link", status_code=204)
-def send_edit_link(
+async def send_edit_link(
     *,
     job_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Response:
     """(Re)send a tokenised edit link to the customer's email."""
-    job = repository.get_job(session=session, user_id=current_user.id, job_id=job_id)
+    job = await repository.get_job(
+        session=session, user_id=current_user.id, job_id=job_id
+    )
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     if not job.customer_email:
@@ -233,16 +281,16 @@ def send_edit_link(
 
 
 @router.get("/{job_id}/changelog", response_model=list[JobUpdateLogPublic] | None)
-def get_job_changelog(
+async def get_job_changelog(
     *,
     job_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Any:
     """Return the update history — accessible to the job owner or any lead purchaser when closed."""
-    job = repository.get_job(session=session, job_id=job_id)
+    job = await repository.get_job(session=session, job_id=job_id)
     is_owner = job and job.created_by_id == current_user.id
-    is_purchaser = repository.is_lead_purchaser(
+    is_purchaser = await repository.is_lead_purchaser(
         session=session, job_id=job_id, user_id=current_user.id
     )
     if not is_owner and not is_purchaser:
@@ -251,5 +299,5 @@ def get_job_changelog(
         if job.lead_status != LeadStatus.closed:
             return None
 
-    logs = repository.get_update_logs(session=session, job_id=job_id)
+    logs = await repository.get_update_logs(session=session, job_id=job_id)
     return [JobUpdateLogPublic.from_orm_log(log) for log in logs]

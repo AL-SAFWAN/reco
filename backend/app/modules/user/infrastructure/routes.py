@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.patch("/me", response_model=UserPublic)
-def update_user_me(
+async def update_user_me(
     *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
     """
@@ -31,21 +31,21 @@ def update_user_me(
     """
 
     if current_user.email:
-        existing_user = repository.get_user_by_email(
+        existing_user = await repository.get_user_by_email(
             session=session, email=current_user.email
         )
         if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-    current_user = repository.update_me(
+    current_user = await repository.update_me(
         session=session, user_in=user_in, current_user=current_user
     )
     return current_user
 
 
 @router.patch("/me/password", response_model=Message)
-def update_password_me(
+async def update_password_me(
     *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
 ) -> Any:
     """
@@ -61,14 +61,14 @@ def update_password_me(
             status_code=400,
             detail="New password cannot be the same as the current one",
         )
-    repository.update_me_password(
+    await repository.update_me_password(
         session=session, current_user=current_user, new_password=body.new_password
     )
     return Message(message="Password updated successfully")
 
 
 @router.get("/me", response_model=UserPublic)
-def read_user_me(current_user: CurrentUser) -> Any:
+async def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
@@ -76,37 +76,37 @@ def read_user_me(current_user: CurrentUser) -> Any:
 
 
 @router.delete("/me", response_model=Message)
-def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
+async def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
-    repository.delete_me(session=session, current_user=current_user)
+    await repository.delete_me(session=session, current_user=current_user)
     return Message(message="User deleted successfully")
 
 
 @router.post("/signup", response_model=UserPublic)
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
+async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
     """
-    user = repository.get_user_by_email(session=session, email=user_in.email)
+    user = await repository.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    user = repository.create_user(session=session, user_in=user_in)
+    user = await repository.create_user(session=session, user_in=user_in)
     return user
 
 
 @router.get("/{user_id}", response_model=UserPublic)
-def read_user_by_id(
+async def read_user_by_id(
     user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> Any:
     """
     Get a specific user by id.
     """
-    user = session.get(User, user_id)
+    user = await session.get(User, user_id)
     if user == current_user:
         return user
     else:

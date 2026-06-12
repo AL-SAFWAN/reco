@@ -2,79 +2,91 @@ import json
 import uuid
 
 from sqlalchemy import and_
-from sqlmodel import Session, func, select
+from sqlalchemy.orm import selectinload
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.modules.job.domain.models import Job, JobUpdate, JobUpdateLog
 from app.modules.marketplace.domain.models import LeadPurchase
 
 
-def create_job(
+async def create_job(
     *,
-    session: Session,
+    session: AsyncSession,
     data: Job,
 ) -> Job:
     db_job = Job(**data.model_dump())
     session.add(db_job)
-    session.commit()
-    session.refresh(db_job)
+    await session.commit()
+    await session.refresh(db_job)
     return db_job
 
 
-def get_jobs(
+async def get_jobs(
     *,
-    session: Session,
+    session: AsyncSession,
     user_id: uuid.UUID | None = None,
     skip: int = 0,
     limit: int = 200,
     exclude_user_id: uuid.UUID | None = None,
 ) -> list[Job]:
-    stmt = select(Job)
+    stmt = select(Job).options(selectinload(Job.lead_purchases))
     if user_id is not None:
         stmt = stmt.where(Job.created_by_id == user_id)
     if exclude_user_id is not None:
         stmt = stmt.where(Job.created_by_id != exclude_user_id)
     stmt = stmt.order_by(Job.created_at.desc()).offset(skip).limit(limit)
-    return list(session.exec(stmt).all())
+    result = await session.exec(stmt)
+    return list(result.all())
 
 
-def get_job(
-    *, session: Session, user_id: uuid.UUID | None = None, job_id: uuid.UUID
+async def get_job(
+    *,
+    session: AsyncSession,
+    user_id: uuid.UUID | None = None,
+    exclude_user_id: uuid.UUID | None = None,
+    job_id: uuid.UUID,
 ) -> Job | None:
-    stmt = select(Job).where(Job.id == job_id)
+    stmt = select(Job).options(selectinload(Job.lead_purchases)).where(Job.id == job_id)
     if user_id is not None:
         stmt = stmt.where(Job.created_by_id == user_id)
-    return session.exec(stmt).first()
+    if exclude_user_id is not None:
+        stmt = stmt.where(Job.created_by_id != exclude_user_id)
+    result = await session.exec(stmt)
+    return result.first()
 
 
-def update_job(*, session: Session, db_job: Job, updates: JobUpdate) -> Job:
+async def update_job(*, session: AsyncSession, db_job: Job, updates: JobUpdate) -> Job:
     update_data = updates.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_job, field, value)
     session.add(db_job)
-    session.commit()
-    session.refresh(db_job)
+    await session.commit()
+    await session.refresh(db_job)
     return db_job
 
 
-def delete_job(*, session: Session, db_job: Job) -> None:
-    session.delete(db_job)
-    session.commit()
+async def delete_job(*, session: AsyncSession, db_job: Job) -> None:
+    await session.delete(db_job)
+    await session.commit()
 
 
 # ── Public (token-authenticated) helpers ─────────────────────────
 
 
-def get_job_public(*, session: Session, job_id: uuid.UUID) -> Job | None:
-    """Fetch a job without owner check — used for customer edit-link flow."""
-    return session.exec(select(Job).where(Job.id == job_id)).first()
+async def get_job_public(*, session: AsyncSession, job_id: uuid.UUID) -> Job | None:
+    """Fetch a job with purchases eagerly loaded — used for customer edit-link and notifications."""
+    stmt = select(Job).where(Job.id == job_id).options(selectinload(Job.lead_purchases))
+    result = await session.exec(stmt)
+    return result.first()
 
 
 # ── Changelog helpers ─────────────────────────────────────────────
 
 
-def create_update_log(
+async def create_update_log(
     *,
-    session: Session,
+    session: AsyncSession,
     job_id: uuid.UUID,
     changed_by: str,
     old_values: dict,
@@ -92,24 +104,28 @@ def create_update_log(
         changes=json.dumps(changes),
     )
     session.add(log)
-    session.commit()
-    session.refresh(log)
+    await session.commit()
+    await session.refresh(log)
     return log
 
 
-def get_update_logs(*, session: Session, job_id: uuid.UUID) -> list[JobUpdateLog]:
+async def get_update_logs(
+    *, session: AsyncSession, job_id: uuid.UUID
+) -> list[JobUpdateLog]:
     stmt = (
         select(JobUpdateLog)
         .where(JobUpdateLog.job_id == job_id)
         .order_by(JobUpdateLog.changed_at.desc())
     )
-    return list(session.exec(stmt).all())
+    result = await session.exec(stmt)
+    return list(result.all())
 
 
-def is_lead_purchaser(
-    *, session: Session, job_id: uuid.UUID, user_id: uuid.UUID
+async def is_lead_purchaser(
+    *, session: AsyncSession, job_id: uuid.UUID, user_id: uuid.UUID
 ) -> bool:
     stmt = select(LeadPurchase).where(
         and_(LeadPurchase.job_id == job_id, LeadPurchase.buyer_id == user_id)
     )
-    return session.exec(stmt).first() is not None
+    result = await session.exec(stmt)
+    return result.first() is not None
