@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/dist/client/components/navigation"
 
-const JOBS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/jobs`
+const JOBS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/jobs/`
 
 // ── Fetchers ──────────────────────────────────────────────────────
 
@@ -20,7 +20,7 @@ const fetchJobs = (): Promise<Job[]> =>
   clientFetcher(JOBS_URL, { method: "GET" })
 
 const fetchJob = (id: string): Promise<Job> =>
-  clientFetcher(`${JOBS_URL}/${id}`, { method: "GET" })
+  clientFetcher(`${JOBS_URL}${id}`, { method: "GET" })
 
 const createJob = (body: JobCreate): Promise<Job> =>
   clientFetcher(JOBS_URL, { method: "POST", body })
@@ -31,11 +31,10 @@ const updateJob = ({
 }: {
   id: string
   body: JobUpdate
-}): Promise<Job> =>
-  clientFetcher(`${JOBS_URL}/${id}`, { method: "PATCH", body })
+}): Promise<Job> => clientFetcher(`${JOBS_URL}${id}`, { method: "PATCH", body })
 
 const deleteJob = (id: string): Promise<void> =>
-  clientFetcher(`${JOBS_URL}/${id}`, { method: "DELETE" })
+  clientFetcher(`${JOBS_URL}${id}`, { method: "DELETE" })
 
 // ── Hooks ─────────────────────────────────────────────────────────
 
@@ -85,20 +84,20 @@ export const useDeleteJobMutation = () => {
   })
 }
 
-const MARKETPLACE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/marketplace`
+const MARKETPLACE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/marketplace/`
 
 // marketplace
 const fetchMarketplaceJobs = (): Promise<Job[]> =>
-  clientFetcher(`${MARKETPLACE_URL}/`, { method: "GET" })
+  clientFetcher(`${MARKETPLACE_URL}`, { method: "GET" })
 
 const fetchMarketplaceJob = (id: string): Promise<Job> =>
-  clientFetcher(`${MARKETPLACE_URL}/${id}`, { method: "GET" })
+  clientFetcher(`${MARKETPLACE_URL}${id}`, { method: "GET" })
 
 const fetchUserLeads = (): Promise<Lead[]> =>
-  clientFetcher(`${MARKETPLACE_URL}/leads`, { method: "GET" })
+  clientFetcher(`${MARKETPLACE_URL}leads`, { method: "GET" })
 
 const purchaseLead = (id: string): Promise<Job> =>
-  clientFetcher(`${MARKETPLACE_URL}/leads/${id}/purchase`, { method: "POST" })
+  clientFetcher(`${MARKETPLACE_URL}leads/${id}/purchase`, { method: "POST" })
 
 export const useMarketplaceJobsQuery = () => {
   return useQuery({
@@ -156,13 +155,13 @@ export const usePurchaseLeadMutation = () => {
 type SavedJob = { job_id: string; saved_at: string }
 
 const fetchSavedJobs = (): Promise<SavedJob[]> =>
-  clientFetcher(`${MARKETPLACE_URL}/saved`, { method: "GET" })
+  clientFetcher(`${MARKETPLACE_URL}saved`, { method: "GET" })
 
 const saveJob = (id: string): Promise<SavedJob> =>
-  clientFetcher(`${MARKETPLACE_URL}/saved/${id}`, { method: "POST" })
+  clientFetcher(`${MARKETPLACE_URL}saved/${id}`, { method: "POST" })
 
 const unsaveJob = (id: string): Promise<void> =>
-  clientFetcher(`${MARKETPLACE_URL}/saved/${id}`, { method: "DELETE" })
+  clientFetcher(`${MARKETPLACE_URL}saved/${id}`, { method: "DELETE" })
 
 export const useSavedJobsQuery = () =>
   useQuery({
@@ -201,7 +200,7 @@ export const useUnsaveJobMutation = () => {
 // ── Customer edit-link (public, no auth) ─────────────────────────
 
 const fetchJobForCustomer = (token: string): Promise<Job> =>
-  clientFetcher(`${JOBS_URL}/customer/${token}`, { method: "GET" })
+  clientFetcher(`${JOBS_URL}customer/${token}`, { method: "GET" })
 
 const updateJobAsCustomer = ({
   token,
@@ -210,7 +209,7 @@ const updateJobAsCustomer = ({
   token: string
   body: JobCustomerUpdate
 }): Promise<Job> =>
-  clientFetcher(`${JOBS_URL}/customer/${token}`, { method: "PATCH", body })
+  clientFetcher(`${JOBS_URL}customer/${token}`, { method: "PATCH", body })
 
 export const useJobForCustomerQuery = (token: string) =>
   useQuery({
@@ -241,7 +240,7 @@ export const useUpdateJobAsCustomerMutation = (token: string) => {
 // ── Send / resend edit link (provider action) ─────────────────────
 
 const sendEditLink = (jobId: string): Promise<void> =>
-  clientFetcher(`${JOBS_URL}/${jobId}/send-edit-link`, { method: "POST" })
+  clientFetcher(`${JOBS_URL}${jobId}/send-edit-link`, { method: "POST" })
 
 export const useSendEditLinkMutation = () =>
   useMutation({
@@ -253,7 +252,7 @@ export const useSendEditLinkMutation = () =>
 // ── Changelog ─────────────────────────────────────────────────────
 
 const fetchChangelog = (jobId: string): Promise<JobUpdateLog[] | null> =>
-  clientFetcher(`${JOBS_URL}/${jobId}/changelog`, { method: "GET" })
+  clientFetcher(`${JOBS_URL}${jobId}/changelog`, { method: "GET" })
 
 export const useJobChangelogQuery = (jobId: string | undefined) =>
   useQuery({
@@ -263,7 +262,7 @@ export const useJobChangelogQuery = (jobId: string | undefined) =>
   })
 
 const fetchChangelogForCustomer = (token: string): Promise<JobUpdateLog[]> =>
-  clientFetcher(`${JOBS_URL}/customer/${token}/changelog`, { method: "GET" })
+  clientFetcher(`${JOBS_URL}customer/${token}/changelog`, { method: "GET" })
 
 export const useJobChangelogForCustomerQuery = (token: string) =>
   useQuery({

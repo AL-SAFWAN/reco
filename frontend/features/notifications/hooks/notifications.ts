@@ -3,7 +3,7 @@ import clientFetcher from "@/fetcher/client.fetcher"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useRef } from "react"
 
-const NOTIFICATIONS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/notifications`
+const NOTIFICATIONS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/notifications/`
 
 export type NotificationType =
   | "lead_purchased"
@@ -26,7 +26,7 @@ const fetchNotifications = (): Promise<Notification[]> =>
   clientFetcher(NOTIFICATIONS_URL, { method: "GET" })
 
 const markAllRead = (): Promise<void> =>
-  clientFetcher(`${NOTIFICATIONS_URL}/read`, { method: "PATCH" })
+  clientFetcher(`${NOTIFICATIONS_URL}read`, { method: "PATCH" })
 
 export const useNotificationsQuery = () =>
   useQuery({
@@ -54,7 +54,7 @@ export const useNotificationStream = () => {
   const esRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
-    const url = `${NOTIFICATIONS_URL}/stream`
+    const url = `${NOTIFICATIONS_URL}stream`
     const es = new EventSource(url, { withCredentials: true })
     esRef.current = es
 
