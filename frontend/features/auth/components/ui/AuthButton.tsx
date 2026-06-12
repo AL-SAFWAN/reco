@@ -1,27 +1,26 @@
-"use client";
+"use client"
 
-import React from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useLogoutMutation, useUser } from "@/features/auth/hooks/auth";
+import React from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { useLogoutMutation, useUser } from "@/features/auth/hooks/auth"
 
 function AuthButton() {
-  const { data: user } = useUser();
-  const logout = useLogoutMutation();
+  const { data: user } = useUser()
+  const logout = useLogoutMutation()
 
   const handleLogout = () => {
-    logout.mutate();
-  };
+    logout.mutate()
+  }
 
-  return user && !(user.emailVerified && user.weight) ? (
-    <Button size="sm" variant="outline" onClick={handleLogout}>
-      Logout
-    </Button>
-  ) : (
-    <Button size="sm" asChild>
-      <Link href="/signup">Sign Up</Link>
-    </Button>
-  );
+  return (
+    user &&
+    !user.email_verified && (
+      <Button variant="outline" onClick={handleLogout} className="-mt-2 w-full">
+        Logout
+      </Button>
+    )
+  )
 }
 
-export default AuthButton;
+export default AuthButton

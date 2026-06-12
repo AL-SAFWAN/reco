@@ -95,7 +95,6 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
               <FieldLabel htmlFor="password">Password</FieldLabel>
               <PasswordWithRequirements
                 register={register}
-                errors={errors.password}
                 disabled={isLoading}
               />
             </Field>
@@ -107,7 +106,6 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
                 id="confirmPassword"
                 disabled={isLoading}
                 register={register("confirm_password")}
-                errors={errors.confirm_password}
                 aria-invalid={!!errors.confirm_password}
               />
               {errors.confirm_password && (

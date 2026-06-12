@@ -4,6 +4,7 @@ import { useUser } from "@/features/auth/hooks/auth"
 import VerifyAccountForm from "../../../features/auth/components/otp/VerifyAccountForm"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import AuthButton from "@/features/auth/components/ui/AuthButton"
 
 export default function Page() {
   const { data: user, isLoading } = useUser()
@@ -43,6 +44,8 @@ export default function Page() {
       </div>
 
       <VerifyAccountForm />
+
+      <AuthButton />
     </div>
   )
 }

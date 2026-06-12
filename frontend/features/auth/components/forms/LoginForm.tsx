@@ -85,7 +85,6 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
               autoComplete="current-password"
               disabled={isLoading}
               register={register("password")}
-              errors={errors.password}
               aria-invalid={!!errors.password}
             />
             {errors.password && <FieldError errors={[errors.password]} />}

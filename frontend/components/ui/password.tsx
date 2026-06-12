@@ -1,36 +1,34 @@
-"use client";
+"use client"
 
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { Check, Eye, EyeOff, X } from "lucide-react";
-import { ChangeEvent, useMemo, useState } from "react";
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { Check, Eye, EyeOff, X } from "lucide-react"
+import { ChangeEvent, useMemo, useState } from "react"
 import {
   FieldError,
   UseFormRegister,
   UseFormRegisterReturn,
-} from "react-hook-form";
+} from "react-hook-form"
 
 export default function PasswordWithRequirements({
   register,
-  errors,
   disabled,
 }: {
-  register: UseFormRegister<any>;
-  errors?: FieldError;
-  disabled: boolean;
+  register: UseFormRegister<any>
+  disabled: boolean
 }) {
   const { onChange, onBlur, name, ref } = register("password", {
     required: true,
-  });
+  })
 
-  const [password, setPassword] = useState("");
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [password, setPassword] = useState("")
+  const [isVisible, setIsVisible] = useState<boolean>(false)
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    onChange(e);
-  };
-  const toggleVisibility = () => setIsVisible((prevState) => !prevState);
+    setPassword(e.target.value)
+    onChange(e)
+  }
+  const toggleVisibility = () => setIsVisible((prevState) => !prevState)
 
   const checkStrength = (pass: string) => {
     const requirements = [
@@ -38,31 +36,31 @@ export default function PasswordWithRequirements({
       { regex: /[0-9]/, text: "At least 1 number" },
       { regex: /[a-z]/, text: "At least 1 lowercase letter" },
       { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-    ];
+    ]
 
     return requirements.map((req) => ({
       met: req.regex.test(pass),
       text: req.text,
-    }));
-  };
+    }))
+  }
 
-  const strength = checkStrength(password);
+  const strength = checkStrength(password)
 
   const strengthScore = useMemo(() => {
-    return strength.filter((req) => req.met).length;
-  }, [strength]);
+    return strength.filter((req) => req.met).length
+  }, [strength])
 
   const getStrengthTextColor = (score: number) => {
-    if (score <= 2) return "text-red-500";
-    if (score === 3) return "text-amber-500";
-    return "text-emerald-500";
-  };
+    if (score <= 2) return "text-red-500"
+    if (score === 3) return "text-amber-500"
+    return "text-emerald-500"
+  }
 
   const getStrengthText = (score: number) => {
-    if (score <= 2) return "Weak password";
-    if (score === 3) return "Fair password";
-    return "Strong password";
-  };
+    if (score <= 2) return "Weak password"
+    if (score === 3) return "Fair password"
+    return "Strong password"
+  }
 
   return (
     <>
@@ -79,11 +77,11 @@ export default function PasswordWithRequirements({
           ref={ref} // assign ref prop
           aria-invalid={strengthScore < 4}
           aria-describedby="password-strength"
-          error={errors}
           disabled={disabled}
         />
+
         <button
-          className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground/80 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="absolute top-1/2 right-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground/80 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onClick={toggleVisibility}
           aria-label={isVisible ? "Hide password" : "Show password"}
@@ -151,23 +149,21 @@ export default function PasswordWithRequirements({
         </>
       )}
     </>
-  );
+  )
 }
 export function TogglePassword({
   register,
-  errors,
   divClassName,
   className,
   ...props
 }: {
-  register: UseFormRegisterReturn;
-  errors?: FieldError;
-  divClassName?: string;
-  className?: string;
-  [key: string]: any;
+  register: UseFormRegisterReturn
+  divClassName?: string
+  className?: string
+  [key: string]: any
 }) {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
-  const toggleVisibility = () => setIsVisible((prevState) => !prevState);
+  const [isVisible, setIsVisible] = useState<boolean>(false)
+  const toggleVisibility = () => setIsVisible((prevState) => !prevState)
   return (
     <div className={"relative " + divClassName}>
       <Input
@@ -177,11 +173,11 @@ export function TogglePassword({
         type={isVisible ? "text" : "password"}
         {...register}
         aria-describedby="password-strength"
-        error={errors}
         {...props}
       />
+
       <button
-        className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground/80 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="absolute top-1/2 right-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground/80 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
         type="button"
         onClick={toggleVisibility}
         aria-label={isVisible ? "Hide password" : "Show password"}
@@ -195,5 +191,5 @@ export function TogglePassword({
         )}
       </button>
     </div>
-  );
+  )
 }

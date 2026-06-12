@@ -70,7 +70,6 @@ export function ResetForm({ className, ...props }: UserAuthFormProps) {
               <FieldLabel htmlFor="password">New Password</FieldLabel>
               <PasswordWithRequirements
                 register={register}
-                errors={errors.password}
                 disabled={isPending}
               />
             </Field>
@@ -82,7 +81,6 @@ export function ResetForm({ className, ...props }: UserAuthFormProps) {
                 id="confirmPassword"
                 disabled={isPending}
                 register={register("confirmPassword")}
-                errors={errors.confirmPassword}
                 aria-invalid={!!errors.confirmPassword}
               />
               {errors.confirmPassword && (
