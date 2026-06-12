@@ -52,10 +52,15 @@ export default async function clientFetcher<T = any>(
     }
   }
 
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("access_token") : null
+  if (token && !normalizedHeaders["Authorization"]) {
+    normalizedHeaders["Authorization"] = `Bearer ${token}`
+  }
+
   const response = await fetchWithErrorHandling(url, {
     ...restOptions,
     method: options.method || "GET", // Default to GET if method not specified
-    credentials: "include", // Include cookies in client-side fetch
     headers: normalizedHeaders,
     body,
   })

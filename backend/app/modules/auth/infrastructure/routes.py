@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.config import settings
@@ -29,10 +29,9 @@ router = APIRouter()
 
 @router.post("/login")
 async def login(
-    response: Response,
     session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-) -> UserPublic:
+) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
@@ -44,30 +43,7 @@ async def login(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     access_token = service.create_access_token_for_user(user_id=user.id)
-
-    if settings.ENVIRONMENT == "production":
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            max_age=3600,
-            expires=3600,
-            httponly=True,
-            secure=True,
-            samesite="none",
-            domain=settings.FRONTEND_DOMAIN,
-        )
-    else:
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            max_age=3600,
-            expires=3600,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-        )
-
-    return user
+    return Token(access_token=access_token)
 
 
 @router.post("/login/access-token")
@@ -99,37 +75,15 @@ async def test_token(current_user: CurrentUser) -> Any:
 
 
 @router.post("/logout")
-async def logout(response: Response):
+async def logout():
     """
-    Logout the user by removing the access_token cookie.
+    Logout the user.
     """
-
-    if settings.ENVIRONMENT == "production":
-        response.delete_cookie(
-            key="access_token",
-            httponly=True,
-            secure=True,
-            samesite="none",
-            domain=settings.FRONTEND_DOMAIN,
-        )
-    else:
-        response.delete_cookie(
-            key="access_token",
-            httponly=True,
-            secure=False,
-            samesite="lax",
-        )
-
     return Message(message="Successfully logged out.")
 
 
-@router.post(
-    "/register",
-    response_model=UserPublic,
-)
-async def create_account(
-    response: Response, session: SessionDep, user_in: UserRegister
-) -> Any:
+@router.post("/register")
+async def create_account(session: SessionDep, user_in: UserRegister) -> Token:
     """
     Create an Account
     """
@@ -167,30 +121,7 @@ async def create_account(
         )
 
     access_token = service.create_access_token_for_user(user_id=user.id)
-
-    if settings.ENVIRONMENT == "production":
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            max_age=3600,
-            expires=3600,
-            httponly=True,
-            secure=True,
-            samesite="none",
-            domain=".tms-applications.com",
-        )
-    else:
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            max_age=3600,
-            expires=3600,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-        )
-
-    return user
+    return Token(access_token=access_token)
 
 
 @router.post("/password-recovery/{email}")

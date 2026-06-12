@@ -32,7 +32,8 @@ export const useLoginMutation = () => {
   return useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      queryClient.setQueryData(["user"], data)
+      localStorage.setItem("access_token", data.access_token)
+      queryClient.invalidateQueries({ queryKey: ["user"] })
       // Check for redirect parameter in URL
       const params = new URLSearchParams(window.location.search)
       const redirect = params.get("redirect")
@@ -53,7 +54,8 @@ export const useSignUpMutation = () => {
   return useMutation({
     mutationFn: signup,
     onSuccess: (data) => {
-      queryClient.setQueryData(["user"], data)
+      localStorage.setItem("access_token", data.access_token)
+      queryClient.invalidateQueries({ queryKey: ["user"] })
       router.push("/otp")
     },
   })
@@ -120,10 +122,9 @@ export const useUser = () => {
   })
 }
 
-const logout = async () =>
-  clientFetcher(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/logout`, {
-    method: "POST",
-  })
+const logout = () => {
+  localStorage.removeItem("access_token")
+}
 
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient() // Get the queryClient instance
