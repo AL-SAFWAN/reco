@@ -25,7 +25,6 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3 md:hidden">
           <TokenBalance compact />
-          <NavigationSheet />
           <UserNav />
         </div>
       </div>

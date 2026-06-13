@@ -12,7 +12,7 @@ import {
 import { HomeIcon, RssIcon, BriefcaseIcon, WalletIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const navLinks = [
+export const navLinks = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/feed", label: "Feed", icon: RssIcon },
   { href: "/posting", label: "Jobs", icon: BriefcaseIcon },

@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { cn, formatRelativeTime } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { MetricTile } from "../components/ui/metric-tile"
+import { MobileBottomNav } from "@/components/mobile-nav"
 
 function ActionCard({
   href,
@@ -51,18 +52,21 @@ function ActionCard({
     >
       <div
         className={cn(
-          "flex size-10 items-center justify-center rounded-full",
+          "flex size-6 items-center justify-center rounded-full sm:size-10",
           dark ? "bg-background/10" : "bg-foreground/8"
         )}
       >
         <Icon
-          className={cn("size-5", dark ? "text-background" : "text-foreground")}
+          className={cn(
+            "size-3 sm:size-5",
+            dark ? "text-background" : "text-foreground"
+          )}
         />
       </div>
       <div>
         <p
           className={cn(
-            "text-base font-bold",
+            "text-sm font-bold",
             dark ? "text-background" : "text-foreground"
           )}
         >
@@ -70,7 +74,7 @@ function ActionCard({
         </p>
         <p
           className={cn(
-            "mt-0.5 text-sm",
+            "mt-0.5 hidden text-sm sm:block",
             dark ? "text-background/60" : "text-muted-foreground"
           )}
         >
@@ -403,6 +407,7 @@ export default function Page() {
     <AuthGuard>
       <Navbar />
       <Dashboard />
+      <MobileBottomNav />
     </AuthGuard>
   )
 }

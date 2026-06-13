@@ -194,7 +194,7 @@ export default function BillingPage() {
     : "—"
 
   return (
-    <div>
+    <div className="pb-13 sm:pb-0">
       <div className="bg-foreground px-4 py-10 sm:px-6 sm:py-10.5">
         <div className="mx-auto max-w-4xl">
           <h1 className="text-4xl font-black tracking-tight text-background sm:text-5xl">
