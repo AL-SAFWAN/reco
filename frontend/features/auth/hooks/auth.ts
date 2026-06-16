@@ -126,9 +126,13 @@ export const useLogout = () => {
   const queryClient = useQueryClient() // Get the queryClient instance
   const router = useRouter()
 
-  localStorage.removeItem("access_token")
-  queryClient.removeQueries({ queryKey: ["user"] })
-  router.push("/login")
+  const logout = () => {
+    localStorage.removeItem("access_token")
+    queryClient.removeQueries({ queryKey: ["user"] })
+    router.push("/login")
+  }
+
+  return logout
 }
 
 const requestOTP = (data: EmailFormInputs) =>

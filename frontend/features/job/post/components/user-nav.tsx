@@ -26,7 +26,7 @@ import { LogOutIcon } from "lucide-react"
 
 export function UserNav() {
   const { data: user } = useUser()
-
+  const logout = useLogout()
   const { data: notifications = [] } = useNotificationsQuery()
   useNotificationStream()
   const initials = user
@@ -64,7 +64,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
-          onSelect={() => useLogout()}
+          onSelect={() => logout()}
         >
           <LogOutIcon className="mr-2 size-4 stroke-destructive" />
           Log out
