@@ -157,7 +157,7 @@ function Dashboard() {
   const firstName = user?.first_name ?? "there"
   const lastName = user?.last_name ?? ""
   return (
-    <div>
+    <div className="pb-13 sm:pb-0">
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <div className="bg-foreground px-4 py-10 sm:px-6 sm:py-11">
         <div className="mx-auto max-w-6xl">

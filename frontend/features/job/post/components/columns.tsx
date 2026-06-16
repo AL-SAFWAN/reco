@@ -111,7 +111,11 @@ export const columns: ColumnDef<Job>[] = [
   {
     accessorKey: "lead_status",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader
+        column={column}
+        title="Status"
+        className="hidden sm:block"
+      />
     ),
     cell: ({ row }) => {
       const status = statuses.find(
@@ -124,8 +128,9 @@ export const columns: ColumnDef<Job>[] = [
       return (
         <div
           className={cn(
-            "svg:text-white flex w-[100px] items-center gap-2",
-            status.label === "Open" && "text-emerald-600 dark:text-emerald-400"
+            "svg:text-white items-center sm:flex sm:w-[100px] sm:gap-2",
+            status.label === "Open" && "text-emerald-600 dark:text-emerald-400",
+            "hidden"
           )}
         >
           {status.icon && (
@@ -148,7 +153,11 @@ export const columns: ColumnDef<Job>[] = [
   {
     accessorKey: "urgency",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Urgency" />
+      <DataTableColumnHeader
+        column={column}
+        title="Urgency"
+        className="hidden md:block"
+      />
     ),
     cell: ({ row }) => {
       const priority = urgency.find(
@@ -160,7 +169,7 @@ export const columns: ColumnDef<Job>[] = [
       }
 
       return (
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center md:flex md:gap-2">
           {priority.icon && (
             <priority.icon className="size-4 text-muted-foreground" />
           )}

@@ -10,7 +10,8 @@ export default function RootLayout({
   return (
     <AuthGuard>
       <Navbar />
-      {children}
+
+      <div className="pb-13 sm:pb-0">{children}</div>
       <MobileBottomNav />
     </AuthGuard>
   )

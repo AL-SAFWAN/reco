@@ -597,12 +597,10 @@ export function EditJobForm({
   job,
   onSuccess,
   onCancel,
-  page,
 }: {
   job: Job
   onSuccess: () => void
   onCancel: () => void
-  page?: boolean
 }) {
   const { mutate, isPending } = useUpdateJobMutation()
   const { mutate: sendEditLink, isPending: isSendingLink } =
@@ -632,12 +630,9 @@ export function EditJobForm({
     <>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className={
-          "relative flex min-h-0 flex-1 flex-col pt-4" +
-          (page ? " border border-y-0 py-4 pb-0" : "")
-        }
+        className={"relative flex min-h-0 flex-1 flex-col pt-4"}
       >
-        <div className="grid gap-5 overflow-y-auto px-6">
+        <div className="border-b px-6 pb-3 sm:border-b-0 sm:pb-0">
           {/* Status */}
           <div className="grid gap-4 sm:grid-cols-2">
             <Controller

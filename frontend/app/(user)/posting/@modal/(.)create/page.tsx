@@ -11,16 +11,23 @@ import {
 import { CreateJobForm } from "@/features/job/post/components/job-posting-dialog"
 import { Button } from "@/components/ui/button"
 import { Maximize2 } from "lucide-react"
+import React from "react"
 
 export default function CreateJobModal() {
+  const [open, setOpen] = React.useState(true)
   const router = useRouter()
 
   function dismiss() {
-    router.back()
+    setOpen(false)
+    router.push("/posting")
+  }
+  function completed() {
+    setOpen(false)
+    router.push("/posting")
   }
 
   return (
-    <Dialog open onOpenChange={(open) => !open && dismiss()}>
+    <Dialog open={open} onOpenChange={(open) => !open && dismiss()}>
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
         <DialogHeader className="border-b px-6 py-4">
           <DialogTitle>Post a recovery job</DialogTitle>
@@ -29,10 +36,7 @@ export default function CreateJobModal() {
             this job lead.
           </DialogDescription>
         </DialogHeader>
-        <CreateJobForm
-          onSuccess={() => router.push("/posting")}
-          onCancel={dismiss}
-        />
+        <CreateJobForm onSuccess={completed} onCancel={dismiss} />
       </DialogContent>
     </Dialog>
   )

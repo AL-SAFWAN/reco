@@ -20,13 +20,14 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
-    <div className="flex items-center justify-between space-x-2">
-      <div className="flex flex-1 items-center gap-2">
+    <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+      {/* <div className="flex items-center justify-between space-x-2 "> */}
+      <div className="flex w-full flex-1 items-center gap-2">
         <Input
           placeholder="Filter job postings..."
           value={(table.getState().globalFilter as string) ?? ""}
           onChange={(event) => table.setGlobalFilter(event.target.value)}
-          className="max-w-xs text-sm"
+          className="w-full text-sm sm:max-w-xs"
         />
         {table.getColumn("lead_status") && (
           <DataTableFacetedFilter
@@ -53,8 +54,8 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <div className="flex items-center gap-2">
-        <Button asChild className="gap-2">
+      <div className="flex w-full items-center gap-2 sm:w-fit">
+        <Button asChild className="w-full gap-2 sm:w-fit">
           <Link href="/posting/create">
             <Plus className="size-4" />
             Add Job Posting
