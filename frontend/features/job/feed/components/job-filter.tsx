@@ -10,8 +10,9 @@ import {
   JobSearchForm,
   filtersToSearchParams,
 } from "./job-search-form"
+import { cn } from "@/lib/utils"
 
-export function JobFilter() {
+export function JobFilter({ className }: { className?: string }) {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -32,7 +33,7 @@ export function JobFilter() {
   ].filter(Boolean) as { label: string; key: keyof Filters }[]
 
   return (
-    <div className="rounded-2xl border bg-card p-4 sm:p-5">
+    <div className={cn("rounded-2xl border bg-card p-4 sm:p-5", className)}>
       <JobSearchForm filters={filters} onChange={setFilters} />
       {activeSpecialFilters.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">

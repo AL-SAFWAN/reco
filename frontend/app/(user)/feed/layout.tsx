@@ -28,14 +28,19 @@ export default function JobsLayout({
       </div>
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="space-y-6">
-          <JobFilter />
+          <JobFilter className={cn(isDetailPage && "hidden lg:block")} />
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,400px)_1fr]">
             {/* Job list — hidden on mobile when viewing a detail page */}
             <div className={cn(isDetailPage && "hidden lg:block")}>
               <JobBoard />
             </div>
             {/* Detail pane — hidden on mobile when on the list-only page; sticky on desktop */}
-            <main className={cn("lg:sticky lg:top-4", !isDetailPage && "hidden lg:block")}>
+            <main
+              className={cn(
+                "lg:sticky lg:top-4",
+                !isDetailPage && "hidden lg:block"
+              )}
+            >
               {children}
             </main>
           </div>

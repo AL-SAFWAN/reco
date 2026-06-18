@@ -294,7 +294,7 @@ export function JobDetail({
         </Section>
 
         <Section title="Route">
-          <div className="grid grid-cols-2 space-y-3 rounded-2xl">
+          <div className="grid space-y-3 rounded-2xl sm:grid-cols-2">
             <div className="flex gap-3">
               <MapPin className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <div>
