@@ -152,7 +152,7 @@ export function NotificationMenu() {
           )}
         </DropdownMenuSubTrigger>
         <DropdownMenuPortal>
-          <DropdownMenuSubContent className="w-80 p-0">
+          <DropdownMenuSubContent className="absolute top-10 right-0 w-80 p-0 sm:relative">
             <div className="border-b px-4 py-3">
               <p className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
                 Notifications
