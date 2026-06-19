@@ -11,6 +11,7 @@ import {
   Coins,
   MapPin,
   Navigation,
+  Star,
   Zap,
 } from "lucide-react"
 import { cn, formatRelativeTime } from "@/lib/utils"
@@ -134,21 +135,23 @@ export function JobDetail({
       {/* ── Header ── */}
       <div className="bg-foreground px-6 py-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              {job.urgency === "Immediate" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-background/15 px-2 py-0.5 text-[10px] font-bold text-background">
-                  <Zap className="size-3" />
-                  Urgent
+          <div className="w-full space-y-1">
+            <div className="flex w-full items-center justify-between">
+              <div className="flex items-center gap-2">
+                {job.urgency === "Immediate" ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-background/15 px-2 py-0.5 text-[10px] font-bold text-background">
+                    <Zap className="size-3" />
+                    Urgent
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-background/10 px-2 py-0.5 text-[10px] font-semibold text-background/60">
+                    Scheduled
+                  </span>
+                )}
+                <span className="font-mono text-[10px] text-background/30">
+                  {job.id.slice(0, 8)}
                 </span>
-              ) : (
-                <span className="rounded-full bg-background/10 px-2 py-0.5 text-[10px] font-semibold text-background/60">
-                  Scheduled
-                </span>
-              )}
-              <span className="font-mono text-[10px] text-background/30">
-                {job.id.slice(0, 8)}
-              </span>
+              </div>
             </div>
             <h2 className="text-2xl font-black tracking-tight text-balance text-background">
               {job.service_type}
@@ -240,19 +243,19 @@ export function JobDetail({
             </Button>
           )}
           <Button
-            variant="outline"
+            size="icon-lg"
             onClick={onToggleSave}
-            className={cn(
-              "border-background/10! bg-background/5! text-background! hover:bg-background/20! hover:text-background!",
-              saved && "border-background/40"
-            )}
+            className={
+              "group border-background/10! bg-background/5! text-background! hover:bg-background/20! hover:text-background!"
+            }
           >
-            {saved ? (
-              <BookmarkCheck className="size-4" />
-            ) : (
-              <Bookmark className="size-4" />
-            )}
-            {saved ? "Saved" : "Save"}
+            <Star
+              className={cn(
+                "stroke-background group-hover:fill-amber-300 group-hover:stroke-amber-300 hover:cursor-pointer dark:stroke-black dark:group-hover:stroke-amber-300",
+                saved &&
+                  "fill-amber-300 stroke-amber-300 dark:fill-amber-400 dark:stroke-amber-400"
+              )}
+            />
           </Button>
         </div>
       </div>

@@ -33,6 +33,7 @@ export default function Page() {
   )
 
   const toggleSave = (id: string) => {
+    if (unsaveJobMutation.isPending || saveJobMutation.isPending) return
     if (saved) {
       unsaveJobMutation.mutate(id)
     } else {

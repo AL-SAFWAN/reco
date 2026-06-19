@@ -173,7 +173,7 @@ export function JobSearchForm({ filters, onChange }: JobSearchFormProps) {
               checked={filters.saved_only}
               onCheckedChange={(checked) => set({ saved_only: checked })}
             >
-              Saved jobs
+              Starred jobs
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={filters.purchased_only}

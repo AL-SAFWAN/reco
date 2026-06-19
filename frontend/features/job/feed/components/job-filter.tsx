@@ -24,7 +24,7 @@ export function JobFilter({ className }: { className?: string }) {
   }
 
   const activeSpecialFilters = [
-    filters.saved_only && { label: "Saved Jobs", key: "saved_only" as const },
+    filters.saved_only && { label: "Starred Jobs", key: "saved_only" as const },
     filters.purchased_only && {
       label: "Purchased Leads",
       key: "purchased_only" as const,

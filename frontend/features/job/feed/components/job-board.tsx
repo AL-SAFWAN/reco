@@ -60,6 +60,7 @@ export function JobBoard() {
             const isActive = pathname === `/feed/${job.id}`
             return (
               <JobCard
+                saved={savedIds.has(job.id)}
                 key={job.id}
                 job={job}
                 selected={isActive}

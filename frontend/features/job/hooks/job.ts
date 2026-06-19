@@ -173,6 +173,22 @@ export const useSaveJobMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: saveJob,
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["marketplace", "saved"] })
+      const previousSaved = queryClient.getQueryData<SavedJob[]>([
+        "marketplace",
+        "saved",
+      ])
+      queryClient.setQueryData<SavedJob[]>(["marketplace", "saved"], (old) => {
+        const job = { job_id: id, saved_at: new Date().toISOString() }
+        if (!old) return [job]
+        if (old.some((job) => job.job_id === id)) return old
+        return [...old, job]
+      })
+
+      // 4. Return context for the error handler
+      return { previousSaved }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["marketplace", "saved"] })
       toast.success("Job saved")
@@ -187,6 +203,19 @@ export const useUnsaveJobMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: unsaveJob,
+
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["marketplace", "saved"] })
+      const previousSaved = queryClient.getQueryData<SavedJob[]>([
+        "marketplace",
+        "saved",
+      ])
+      queryClient.setQueryData<SavedJob[]>(["marketplace", "saved"], (old) => {
+        if (!old) return old // nothing to remove
+        return old.filter((job) => job.job_id !== id)
+      })
+      return { previousSaved }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["marketplace", "saved"] })
       toast.success("Job removed from saved")

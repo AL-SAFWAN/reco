@@ -1,10 +1,11 @@
 "use client"
 
-import { Car, Clock, Coins, MapPin, Navigation, Zap } from "lucide-react"
+import { Car, Clock, Coins, MapPin, Navigation, Star, Zap } from "lucide-react"
 import { cn, formatRelativeTime } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Status } from "@/lib/job-data"
 import { Job } from "../../schema/jobSchema"
+import { useSaveJobMutation, useUnsaveJobMutation } from "../../hooks/job"
 
 export function StatusBadge({
   status,
@@ -39,13 +40,25 @@ export function JobCard({
   job,
   selected,
   onSelect,
+  saved,
 }: {
   job: Job
   selected: boolean
   onSelect: () => void
+  saved: boolean
 }) {
   const taken = job.lead_status !== "open"
+  const saveJobMutation = useSaveJobMutation()
+  const unsaveJobMutation = useUnsaveJobMutation()
 
+  const toggleSave = (id: string) => {
+    if (saved) {
+      unsaveJobMutation.mutate(id)
+    } else {
+      saveJobMutation.mutate(id)
+    }
+  }
+  const pending = saveJobMutation.isPending || unsaveJobMutation.isPending
   return (
     <button
       type="button"
@@ -75,7 +88,20 @@ export function JobCard({
             )}
           </div>
         </div>
-        <StatusBadge status={job.lead_status} purchased={job.purchased} />
+        <div className="flex items-center gap-1">
+          <StatusBadge status={job.lead_status} purchased={job.purchased} />
+          <Star
+            onClick={(e) => {
+              e.stopPropagation()
+              if (pending) return
+              toggleSave(job.id)
+            }}
+            className={cn(
+              "size-8 p-2 hover:cursor-pointer hover:fill-amber-300 hover:stroke-amber-300",
+              saved && "fill-amber-300 stroke-amber-300"
+            )}
+          />
+        </div>
       </div>
 
       {/* Service type */}

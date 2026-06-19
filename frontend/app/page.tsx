@@ -230,9 +230,9 @@ function Dashboard() {
         </div>
 
         {/* Activity */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-1">
           {/* Saved Jobs */}
-          <div>
+          {/* <div>
             <div className="mb-1 flex items-center justify-between">
               <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                 Saved Jobs
@@ -282,7 +282,7 @@ function Dashboard() {
                 </ul>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Purchased Leads */}
           <div>

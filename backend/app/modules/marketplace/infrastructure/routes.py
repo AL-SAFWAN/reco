@@ -43,25 +43,17 @@ async def list_jobs(
     result = []
     for job in jobs:
         purchased = any(p.buyer_id == current_user.id for p in job.lead_purchases)
-        if purchased:
-            if job.lead_status == "closed":
-                result.append(
-                    JobMarketplaceFull.model_validate(
-                        job, update={"purchased": purchased}
-                    )
-                )
-            else:
-                result.append(
-                    JobMarketplacePartial.model_validate(
-                        job, update={"purchased": purchased}
-                    )
-                )
+        if purchased and job.lead_status == "closed":
+            result.append(
+                JobMarketplaceFull.model_validate(job, update={"purchased": purchased})
+            )
         else:
             result.append(
-                JobMarketplaceRedacted.model_validate(
+                JobMarketplacePartial.model_validate(
                     job, update={"purchased": purchased}
                 )
             )
+
     return result
 
 
@@ -218,16 +210,7 @@ async def get_job(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     purchased = any(p.buyer_id == current_user.id for p in job.lead_purchases)
-    if purchased:
-        if job.lead_status == "closed":
-            return JobMarketplaceFull.model_validate(
-                job, update={"purchased": purchased}
-            )
-        else:
-            return JobMarketplacePartial.model_validate(
-                job, update={"purchased": purchased}
-            )
+    if purchased and job.lead_status == "closed":
+        return JobMarketplaceFull.model_validate(job, update={"purchased": purchased})
     else:
-        return JobMarketplaceRedacted.model_validate(
-            job, update={"purchased": purchased}
-        )
+        return JobMarketplacePartial.model_validate(job, update={"purchased": purchased})
