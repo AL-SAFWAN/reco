@@ -144,7 +144,7 @@ export default function EditJobPage() {
                 <Button
                   type="button"
                   variant="default"
-                  className="bg-muted-foreground/30 text-background hover:bg-muted-foreground/50"
+                  className="hidden bg-muted-foreground/30 text-background hover:bg-muted-foreground/50 sm:flex"
                   size="sm"
                   disabled={isSendingLink || isPending}
                   onClick={() => sendEditLink(job.id)}

@@ -111,7 +111,7 @@ export default function CreateJobPage() {
             <p className="truncate text-sm font-semibold text-background">
               New Job Posting
             </p>
-            <p className="text-[10px] text-background/70">
+            <p className="hidden text-[10px] text-background/70 sm:block">
               Fill in the details below to post a recovery lead
             </p>
           </div>
