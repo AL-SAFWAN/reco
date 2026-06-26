@@ -13,19 +13,19 @@ TOKEN_PACKAGES = [
         "name": "Starter",
         "token_count": 20,
         "price": 36.00,
-        "description": "Perfect for getting started — 20 tokens at £1.80 per token.",
+        "description": "Perfect for getting started - 20 tokens at £1.80 per token.",
     },
     {
         "name": "Popular",
         "token_count": 40,
         "price": 69.99,
-        "description": "Best value for regular buyers — 40 tokens at £1.75 per token.",
+        "description": "Best value for regular buyers - 40 tokens at £1.75 per token.",
     },
     {
         "name": "Pro",
         "token_count": 80,
         "price": 129.99,
-        "description": "Maximum savings for high-volume use — 80 tokens at £1.62 per token.",
+        "description": "Maximum savings for high-volume use - 80 tokens at £1.62 per token.",
     },
 ]
 

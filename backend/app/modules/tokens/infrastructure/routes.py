@@ -69,7 +69,7 @@ async def purchase_package(
         user_id=current_user.id,
         amount=tokens_added,
         reference_id=reference_id,
-        description=f"{package.name} pack — {tokens_added} tokens",
+        description=f"{package.name} pack - {tokens_added} tokens",
     )
     await session.commit()
 

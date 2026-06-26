@@ -128,8 +128,6 @@ export function NotificationMenu() {
   const { data: notifications = [] } = useNotificationsQuery()
   const { mutate: markRead } = useMarkNotificationsReadMutation()
 
-  // Start SSE stream
-
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const handleOpen = (next: boolean) => {

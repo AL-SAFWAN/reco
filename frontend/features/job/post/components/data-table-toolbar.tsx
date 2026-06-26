@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 
 import { urgency, statuses } from "../../data/data"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
+import { CreateJobDialog } from "./job-posting-dialog"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -55,12 +56,7 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <div className="flex w-full items-center gap-2 sm:w-fit">
-        <Button asChild className="w-full gap-2 sm:w-fit">
-          <Link href="/posting/create">
-            <Plus className="size-4" />
-            Add Job Posting
-          </Link>
-        </Button>
+        <CreateJobDialog />
       </div>
     </div>
   )

@@ -39,7 +39,7 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="relative h-9 w-9 hover:cursor-pointer">
-          <AvatarImage src="/avatars/03.png" alt={user?.first_name} />
+          <AvatarImage alt={user?.first_name} />
           <AvatarFallback>{initials}</AvatarFallback>
           {unreadCount > 0 && (
             <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 p-0 text-[10px] font-bold text-white">

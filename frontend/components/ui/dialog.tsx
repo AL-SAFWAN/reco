@@ -5,7 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { XIcon } from "lucide-react"
+import { Maximize2, XIcon } from "lucide-react"
 
 function Dialog({
   ...props
@@ -50,10 +50,12 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
+  onMaximize,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  onMaximize?: () => void
 }) {
   return (
     <DialogPortal>
@@ -67,6 +69,17 @@ function DialogContent({
         {...props}
       >
         {children}
+        {onMaximize && (
+          <Button
+            variant="ghost"
+            className="absolute top-2 right-10"
+            size="icon-sm"
+            onClick={onMaximize}
+          >
+            <Maximize2 className="size-3" />
+            <span className="sr-only">Maximize</span>
+          </Button>
+        )}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
@@ -74,8 +87,7 @@ function DialogContent({
               className="absolute top-2 right-2"
               size="icon-sm"
             >
-              <XIcon
-              />
+              <XIcon />
               <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>

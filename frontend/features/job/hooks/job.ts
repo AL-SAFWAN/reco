@@ -44,12 +44,22 @@ export const useJobsQuery = () =>
     queryFn: fetchJobs,
   })
 
-export const useJobQuery = (id: string) =>
-  useQuery({
+export const useJobQuery = (id: string) => {
+  const queryClient = useQueryClient()
+  return useQuery({
     queryKey: ["jobs", id],
     queryFn: () => fetchJob(id),
     enabled: !!id,
+    // Seed from the list cache so the job renders instantly on navigation,
+    // then revalidates silently in the background — no loading flicker.
+    initialData: () => {
+      const list = queryClient.getQueryData<Job[]>(["jobs"])
+      return list?.find((j) => j.id === id)
+    },
+    initialDataUpdatedAt: () =>
+      queryClient.getQueryState(["jobs"])?.dataUpdatedAt,
   })
+}
 
 export const useCreateJobMutation = () => {
   const queryClient = useQueryClient()

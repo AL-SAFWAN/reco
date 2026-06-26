@@ -1,7 +1,7 @@
 "use client"
 import { NavMenu } from "@/components/nav-menu"
 import { NavigationSheet } from "@/components/navigation-sheet"
-import { UserNav } from "@/features/job/post/components/user-nav"
+import { UserNav } from "@/components/user-nav"
 import { TokenBalance } from "@/components/token-balance"
 
 const Navbar = () => {
