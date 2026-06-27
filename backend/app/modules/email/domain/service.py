@@ -42,18 +42,18 @@ def send_email(
         mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
     )
 
-    image_path = (
-        Path(__file__).parent.parent / "email-templates" / "images" / "unnamed.gif"
-    )
-    with open(image_path, "rb") as f:
-        image_data = f.read()
-    message.attach(
-        filename="unnamed.gif",
-        data=image_data,
-        content_disposition="inline",
-        content_id="legionLogo",
-        mime_type="image/gif",
-    )
+    # image_path = (
+    #     Path(__file__).parent.parent / "email-templates" / "images" / "unnamed.gif"
+    # )
+    # with open(image_path, "rb") as f:
+    #     image_data = f.read()
+    # message.attach(
+    #     filename="unnamed.gif",
+    #     data=image_data,
+    #     content_disposition="inline",
+    #     content_id="legionLogo",
+    #     mime_type="image/gif",
+    # )
 
     smtp_options = {
         "host": settings.SMTP_HOST,

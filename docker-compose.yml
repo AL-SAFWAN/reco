@@ -86,16 +86,12 @@ services:
     ports:
       - "8000:8000" # Access FastAPI at http://localhost:8000
     environment:
-      # - SMTP_HOST=${SMTP_HOST?Variable not set}
-      # - SMTP_USER=${SMTP_USER?Variable not set}
-      # - SMTP_PASSWORD=${SMTP_PASSWORD?Variable not set}
-      # - SMTP_TLS=${SMTP_TLS?Variable not set}
-      # - SMTP_SSL=${SMTP_SSL?Variable not set}
-      # - SMTP_PORT=${SMTP_PORT?Variable not set}
-      SMTP_HOST: "mailcatcher"
-      SMTP_PORT: "1025"
-      SMTP_TLS: "false"
-      EMAILS_FROM_EMAIL: "noreply@example.com"
+      - SMTP_HOST=${SMTP_HOST?Variable not set}
+      - SMTP_USER=${SMTP_USER?Variable not set}
+      - SMTP_PASSWORD=${SMTP_PASSWORD?Variable not set}
+      - SMTP_TLS=${SMTP_TLS?Variable not set}
+      - SMTP_SSL=${SMTP_SSL?Variable not set}
+      - SMTP_PORT=${SMTP_PORT?Variable not set}
     volumes:
       - ./backend/app:/app/app
       - ./backend/scripts:/app/scripts
